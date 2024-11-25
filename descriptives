@@ -1,0 +1,416 @@
+***Descriptives for North Macedonia paper using Stata
+
+cd ""
+import delimited "MK_202212_processed.csv", encoding(UTF-8) clear
+keep if year>2010 
+
+**create new variables
+gen year_quarter=string(year,"%02.0f") +"_Q"+ string(quarter,"%02.0f")
+egen yearquarter = group(year_quarter), label 
+
+gen len=strlen(tender_cpvs)
+gen industries=substr(tender_cpvs ,1,2)
+destring industries, gen(industry)
+
+gen  name_industry="Agricultural, farming, fishing, forestry" if industry==3
+replace name_industry="Petroleum products, fuel, electricity" if industry==9
+replace name_industry="Mining" if industry==14
+replace name_industry="Food, beverages, tobacco" if industry==15
+replace name_industry="Agricultural machinery" if industry==16
+replace name_industry="Clothing, footwear, luggage articles and accessories" if industry==18
+replace name_industry="Leather and textile fabrics" if industry==19
+replace name_industry="Printed matter and related products" if industry==22
+replace name_industry="Chemical products" if industry==24
+replace name_industry="Office and computing machinery, equipment and supplies" if industry==30
+replace name_industry="Electrical machinery, apparatus, equipment and consumables"	if industry==31
+replace name_industry="Radio, television, communication, telecommunication" if industry==32
+replace name_industry="Medical equipments, pharmaceuticals, personal care products" if industry==33
+replace name_industry="Transport equipments and auxiliary products" if industry==34
+replace name_industry="Security, fire-fighting, police and defence equipment" if industry==35
+replace name_industry="Art materials and accessories" if industry==37
+replace name_industry="Laboratory, optical and precision equipment"	if industry==38
+replace name_industry="Furniture, furnishings, domestic appliances and cleaning products" if industry==39
+replace name_industry="Collected and purified water" if industry==41
+replace name_industry="Industrial machinery" if industry==42
+replace name_industry="Machinery for mining, quarrying, construction equipment " if industry==43
+replace name_industry="Construction structures and materials" if industry==44
+replace name_industry="Construction work" if industry==45
+replace name_industry="Software package and information systems" if industry==48
+replace name_industry="Repair and maintenance services" if industry==50
+replace name_industry="Installation services"	if industry==51
+replace name_industry="Hotel, restaurant and retail trade services" if industry==55
+replace name_industry="Transport services"	if industry==60
+replace name_industry="Transport services"	if industry==63
+replace name_industry="Postal and telecommunications services" if industry==64
+replace name_industry="Public utilities" if industry==65
+replace name_industry="Financial and insurance services" if industry==66
+replace name_industry="Real estate services" if industry==70
+replace name_industry="Architectural, construction, engineering and inspection services" if industry==71
+replace name_industry="IT services: consulting, software development, Internet and support"	if industry==72
+replace name_industry="Research and consultancy services" if industry==73
+replace name_industry="Administration, defence and social security services" if industry==75
+replace name_industry="Services related to the oil and gas industry" if industry==76
+replace name_industry="Agricultural l, forestry, horticultural, aquacultural and apicultural" if industry==77
+replace name_industry="Business services: law, marketing, consulting, recruitment" if industry==79
+replace name_industry="Education and training services" if industry==80
+replace name_industry="Health and social work services" if industry==85
+replace name_industry="Sewage-, refuse-, cleaning-, and environmental services" if industry==90
+replace name_industry="Recreational, cultural and sporting services" if industry==92
+replace name_industry="Other community, social and personal service" if industry==98
+replace name_industry="other" if industry==99
+
+***
+label variable corr_singleb "Single bidder" 
+label variable corr_proc "Procedure type"
+label variable taxhav2  "Tax haven" 
+label variable corr_subm "Length of submission" 
+label variable corr_decp "Length of decision period"
+label variable proa_ycsh4 "Buyer's dependence" 
+label variable corr_ben "Benford's law" 
+
+**Figures
+*Figure 5: CRI distribution by contract
+tabstat cri, stats(n mean median min max)
+    
+local mean ".426384"
+local median ".421566"
+
+hist cri, bin(30) freq color(blue) lcolor(black) lwidth(thin) ///
+	ylab(, format(%8.0g)) graphregion(color(white)) ///
+	xtitle("CRI") ytitle("Number of contracts") ///
+	addplot( pci 0  `mean' 40000 `mean', ///
+	lpattern(dash) lwidth(medium) || pci 0  `median' 40000  `median',  ///
+	lpattern(dash) lwidth(medium)) bgcolor(white)  ylabel(, nogrid) ///
+	legend(order(2 "mean" 3 "median") ///
+	region(style(none)) pos(1) ring(0) col(1))
+
+graph export "contract_cri.png", as(png) replace
+		
+*Figure 6: CRI distribution per buyers
+egen count=count(cri),by(cri)
+egen tag=tag(cri)
+tab count if tag==1 
+bysort buyer_id: gen no_tenders_buyers=_N
+tabstat no_tenders_buyers, stats(n mean median min max)
+
+preserve
+collapse (mean) cri no_tenders_buyers, by(buyer_id)
+
+tabstat cri, stats(n mean median min max) save
+local mean ".4894625"
+local median "0.5"
+
+hist cri, freq color(blue) lcolor(black) lwidth(thin) ///
+	ylab(, format(%8.0g)) graphregion(color(white)) ///
+	xtitle("Average CRI per buyer") ytitle("Number of buyers") ///
+	addplot( pci 0 `mean' 200 `mean', ///
+	lpattern(dash) lwidth(medium) || pci 0  `median' 200  `median',  ///
+	lpattern(dash) lwidth(medium)) bgcolor(white)  ylabel(, nogrid) ///
+	legend(order(2 "mean" 3 "median") ///
+	region(style(none)) pos(1) ring(0) col(1))
+	
+graph export "buyers_cri.png", as(png) replace
+restore
+
+**Figure 7: CRI distribution per supplier
+preserve
+keep if filter_ok==1
+bysort bidder_id: gen no_tenders_bidder=_N
+tabstat no_tenders_bidder, stats(n mean median min max)
+collapse (mean) cri no_tenders_bidder, by(bidder_id)
+
+tabstat cri, stats(n mean median min max)
+
+local mean ".5012833" 
+local median ".5"
+
+hist cri, bin(25) freq color(blue) lcolor(black) lwidth(thin) ///
+	ylab(, format(%8.0g)) graphregion(color(white)) ///
+	xtitle("Average CRI per supplier") ytitle("Number of suppliers") ///
+	addplot( pci 0 `mean' 2000 `mean', ///
+	lpattern(dash) lwidth(medium) || pci 0 `median' 2000 `median',  ///
+	lpattern(dash) lwidth(medium)) bgcolor(white)  ylabel(, nogrid) ///
+	legend(order(2 "mean" 3 "median") ///
+	region(style(none)) pos(1) ring(0) col(1))
+
+graph export "supplier_cri.png", as(png) replace
+
+restore
+
+*Figure 8: Cri by quarter
+preserve
+collapse (mean) cri, by(yearquarter)
+
+twoway (connected cri yearquarter, ///
+	sort xlabel(2(2)49, angle(90) valuelabel) graphregion(color(white)) ///
+	ysc(r(0 1)) ylabel(0 0.25 0.5 0.75 1) xtitle("year") ytitle("CRI") )
+graph export "quarter_cri.png", as(png) replace
+
+restore
+
+****Figure 9: cri by regions
+preserve
+keep if filter_ok==1
+collapse (mean) cri corr_singleb corr_nocft corr_proc corr_subm ///
+	corr_decp proa_ycsh4 corr_ben taxhav , by(buyer_nuts year)
+	
+twoway (connected cri year if buyer_nuts=="MK001", ysc(r(0 1)) ///
+	ylabel(0 0.25 0.5 0.75 1) xlabel(2011(3)2022)) ///
+	(connected cri year if buyer_nuts=="MK002", ysc(r(0 1)) ///
+	ylabel(0 0.25 0.5 0.75 1) xlabel(2011(3)2022)) ///	
+	(connected cri year if buyer_nuts=="MK003", ysc(r(0 1)) ///
+	ylabel(0 0.25 0.5 0.75 1) xlabel(2011(3)2022)) ///
+	(connected cri year if buyer_nuts=="MK004", ysc(r(0 1)) ///
+	ylabel(0 0.25 0.5 0.75 1) xlabel(2011(3)2022))  ///
+	(connected cri year if buyer_nuts=="MK005", ysc(r(0 1))  ///
+	ylabel(0 0.25 0.5 0.75 1) xlabel(2011(3)2022))  ///
+	(connected cri year if buyer_nuts=="MK006", ysc(r(0 1)) ///
+	ylabel(0 0.25 0.5 0.75 1) xlabel(2011(3)2022)) ///	
+	(connected cri year if buyer_nuts=="MK007", ysc(r(0 1)) ///
+	ylabel(0 0.25 0.5 0.75 1) xlabel(2011(3)2022)) 	///
+	(connected cri year if buyer_nuts=="MK008", ysc(r(0 1)) ///
+	ylabel(0 0.25 0.5 0.75 1) xlabel(2011(1)2022) graphregion(color(white)) ///
+	,legend(order(1 "Vardarski" 2 "Istočen" 3 "Jugozapaden"  4 "Jugoistočen" ///
+	5 "Pelagoniski" 6 "Pološki" 7 "Severoistočen" 8 "Skopski")))
+graph export "regions_cri.png", as(png) replace
+restore
+
+
+**Figure 10: graph box cri mean
+sort industry
+by industry: gen cont_ind=_N
+graph box cri if cont_ind>1000, over(name_industry, sort(1)) horizontal
+******
+**Figure 11: Construction and the rest
+preserve 
+gen construction=0
+replace construction=1 if industry==43 | industry==44 | industry==45 | industry==71
+
+collapse (mean) cri, by(construction yearquarter)
+
+twoway (connected cri yearquarter if construction==1, sort) ///
+		(connected cri yearquarter if construction==0, sort ///
+		xlabel(2(2)48, angle(90) valuelabel) ///
+		graphregion(color(white)) ///
+		xtitle("year") title("Construction CRI")  ///
+		ysc(r(0 1)) ylabel(0 0.25 0.5 0.75 1) ///
+		legend(order( 1 "Construction"  2 "Other") ///
+              col(1) ring(1) position(6)))
+		
+restore
+**Figure 12: Covid-health by quarter
+gen year_quarter=string(year,"%02.0f") +"_Q"+ string(quarter,"%02.0f")
+egen yearquarter = group(year_quarter), label
+preserve
+
+gen health=0
+replace health=1 if industry==85
+replace health=2 if industry==33
+
+collapse (mean) cri, by(health yearquarter)
+
+twoway (connected cri yearquarter if health==1, sort) ///
+		(connected cri yearquarter if health==2, sort) ///
+		(connected cri yearquarter if health==0, sort ///
+		xline(38) xlabel(2(2)48, angle(90) valuelabel) ///
+		graphregion(color(white)) ///
+		xtitle("year") title("Health CRI")  ///
+		ysc(r(0 1)) ylabel(0 0.25 0.5 0.75 1) ///
+		legend(order(1 "Health and social work services"  3 "Other" ///
+		2 "Medical equipments, pharmaceuticals, personal care products") ///
+              col(1) ring(1) position(6)))
+		
+restore
+
+
+**Figure 13: cri variables
+preserve
+keep if filter_ok==1
+collapse (mean) cri corr_singleb corr_nocft corr_proc corr_subm ///
+	corr_decp proa_ycsh4 corr_ben taxhav2 , by(year)
+
+twoway (connected corr_singleb year, ///
+	sort xlabel(2011(3)2021) graphregion(color(white)) ///
+	xtitle("year") title("Single bidding")  ///
+	ysc(r(0 1)) ylabel(0 0.25 0.5 0.75 1))
+graph save g11, replace	
+twoway (connected corr_proc year, ///
+	sort xlabel(2011(3)2021) graphregion(color(white)) ///
+	xtitle("year") title("Procedure type")  ///
+	ysc(r(0 1)) ylabel(0 0.25 0.5 0.75 1) )
+graph save g13, replace	
+twoway (connected taxhav2 year, ///
+	sort xlabel(2011(3)2021) graphregion(color(white)) ///
+	xtitle("year") title("Tax haven")  ///
+	ysc(r(0 9)) ylabel(0 3 6 9) )
+graph save g14, replace	
+twoway (connected corr_subm  year, ///
+	sort xlabel(2011(3)2021) graphregion(color(white)) ///
+	xtitle("year") title("Length of submission")  ///
+	ysc(r(0 1)) ylabel(0 0.25 0.5 0.75 1))
+graph save g15, replace	
+twoway (connected  corr_decp year, ///
+	sort xlabel(2011(3)2021) graphregion(color(white)) ///
+	xtitle("year") title("Length of decision period")  ///
+	ysc(r(0 1)) ylabel(0 0.25 0.5 0.75 1))
+graph save g16, replace	
+twoway (connected proa_ycsh4 year, ///
+	sort xlabel(2011(3)2021) graphregion(color(white)) ///
+	xtitle("year") title("Buyer's dependence")  ///
+	ysc(r(0 1)) ylabel(0 0.25 0.5 0.75 1))
+graph save g17, replace	
+twoway (connected corr_ben  year, ///
+	sort xlabel(2011(3)2021) graphregion(color(white)) ///
+	xtitle("year") title("Benford's law")  ///
+	ysc(r(0 1)) ylabel(0 0.25 0.5 0.75 1))
+graph save g18, replace		
+
+graph combine "g11" "g13" "g14" "g15" "g16" "g17" "g18", rows(4) graphregion(color(white)) iscale(.5) 
+graph export "individual_flags.png", as(png) replace
+	
+restore
+
+
+******Appendix figures
+
+preserve
+keep if filter_ok==1
+gen skopje=0
+replace skopje=1 if buyer_nuts=="MK008"
+collapse (sum) tender_finalprice, by(skopje year)
+egen total_tender = total(tender_finalprice), by(year)
+gen percent= tender_finalprice/total_tender
+
+*Figure A1.b: Total awarded contract value as a percentage for Skopje and other regions
+twoway (connected percent year if skopje==1) ///
+	(connected percent year if skopje==0, ///
+	sort xlabel(2011(2)2022) graphregion(color(white)) ///
+	legend(order(1 "Skopje" 2 "Other regions")) ylabel(, nogrid) ///
+	xtitle("year") ytitle("Percentage of awarded contract values"))
+graph export "regions_percentage.png", as(png) replace
+
+*Figure A1.c: Total awarded contract value for Skopje and other regions, 2011-2022, North Macedonia.
+twoway (connected tender_finalprice year if skopje==1) ///
+	(connected tender_finalprice year if skopje==0, ///
+	sort xlabel(2011(2)2022) graphregion(color(white)) ///
+	legend(order(1 "Skopje" 2 "Other regions")) ylabel(, nogrid) ///
+	xtitle("year") ytitle("Sum of awarded contract values"))
+graph export "regions_total.png", as(png) replace
+
+restore
+
+*Figure A1.d: Average CRI across regions in North Macedonia for 2011-2022.
+
+local buyer_nuts_codes "MK001 MK002 MK003 MK004 MK005 MK006 MK007 MK008"
+local titles "Vardarski Istočen Jugozapaden Jugoistočen Pelagoniski Pološki Severoistočen Skopski"
+
+forval i = 1/8 {
+
+    local buyer_nuts : word `i' of `buyer_nuts_codes'
+    local title : word `i' of `titles'
+
+    graph box cri if buyer_nuts == "`buyer_nuts'", ///
+        title("`title'") graphregion(color(white))
+    graph save "g`buyer_nuts'", replace
+}
+
+graph combine "gMK001" "gMK002" "gMK003" "gMK004" "gMK005" "gMK006" "gMK007" "gMK008", rows(2)
+graph export "regions_graphbox.png", as(png) replace
+
+
+**Figure A1.e: Annual trends for individual red flags by each region, 2011-2022.
+preserve
+destring(buyer_nuts), gen (nuts) ignore("MK")
+
+collapse (mean) cri corr_singleb corr_nocft corr_proc corr_subm ///
+	corr_decp proa_ycsh4 corr_ben taxhav2 , by(year nuts)
+
+forvalues i = 1(1)8{
+	
+	if nuts == 1 {
+        local text "Vardarski"
+    }
+    else if nuts == 2  {
+        local text "Istočen"
+    }
+    else if nuts == 3  {
+        local text "Jugozapaden"
+    }
+	else if nuts == 4  {
+        local text "Jugoistočen"
+    }
+	else if nuts == 5  {
+        local text "Pelagoniski"
+    }
+	else if nuts == 6  {
+        local text "Pološki"
+    }
+	else if nuts == 7 {
+        local text "Severoistočen"
+	}
+		else if nuts == 8 {
+        local text "Skopski"
+	}
+	
+	
+	twoway (connected corr_singleb year if nuts==`i' , ///
+		sort xlabel(2011(3)2021) graphregion(color(white)) ///
+		xtitle("year") title("Single bidding")  ///
+		ysc(r(0 1)) ylabel(0 0.25 0.5 0.75 1))
+	graph save g`i'1, replace	
+	twoway (connected corr_proc year if nuts==`i', ///
+		sort xlabel(2011(3)2021) graphregion(color(white)) ///
+		xtitle("year") title("Procedure type")  ///
+		ysc(r(0 1)) ylabel(0 0.25 0.5 0.75 1) )
+	graph save g`i'3, replace	
+	twoway (connected taxhav2 year if nuts==`i', ///
+		sort xlabel(2011(3)2021) graphregion(color(white)) ///
+		xtitle("year") title("Tax haven")  ///
+		ysc(r(0 9)) ylabel(0 3 6 9) )
+	graph save g`i'4, replace	
+	twoway (connected corr_subm  year if nuts==`i', ///
+		sort xlabel(2011(3)2021) graphregion(color(white)) ///
+		xtitle("year") title("Length of submission")  ///
+		ysc(r(0 1)) ylabel(0 0.25 0.5 0.75 1))
+	graph save g`i'5, replace	
+	twoway (connected  corr_decp year if nuts==`i', ///
+		sort xlabel(2011(3)2021) graphregion(color(white)) ///
+		xtitle("year") title("Length of decision period")  ///
+		ysc(r(0 1)) ylabel(0 0.25 0.5 0.75 1))
+	graph save g`i'6, replace	
+	twoway (connected proa_ycsh4 year if nuts==`i', ///
+		sort xlabel(2011(3)2021) graphregion(color(white)) ///
+		xtitle("year") title("Buyer's dependence")  ///
+		ysc(r(0 1)) ylabel(0 0.25 0.5 0.75 1))
+	graph save g`i'7, replace	
+	twoway (connected corr_ben  year if nuts==`i', ///
+		sort xlabel(2011(3)2021) graphregion(color(white)) ///
+		xtitle("year") title("Benford's law")  ///
+		ysc(r(0 1)) ylabel(0 0.25 0.5 0.75 1))
+	graph save g`i'8, replace	
+	graph combine "g`i'1" "g`i'3" "g`i'4" "g`i'5" "g`i'6" "g`i'7" "g`i'8", rows(4) graphregion(color(white)) iscale(.5) title("`text'", size(small)) 
+	graph export "reg_`i'.png", as(png) replace 
+}
+restore
+
+*Figure A1.f: Annual trends for cri by industry, 2011-2022. (red line shows the start of Covid-19 pandemic)
+
+preserve
+
+collapse (mean) cri, by(name_industry yearquarter)
+
+levelsof name_industry, local(industry_list)
+
+foreach industry in `industry_list' {
+    twoway (connected cri yearquarter if name_industry == "`industry'"), ///
+        xline(38) xlabel(2(2)48, angle(90) valuelabel) ///
+        graphregion(color(white)) ///
+        xtitle("Year") ///
+        yscale(r(0 1)) ylabel(0 0.25 0.5 0.75 1) ///
+        title("`industry'")
+    
+    graph export "reg_`industry'.png", as(png) replace
+}
+	
+restore
+
