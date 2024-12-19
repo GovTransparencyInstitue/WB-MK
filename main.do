@@ -9,7 +9,7 @@ clear all
 cap program drop _all
 
 **# Initialize Project folder
-init_project "C:/Ourfolders/Aly" "MK_WB"
+init_project "Folder_path" "MK_WB"
 
 **# Load Global Macros
 // cd "C:/Ourfolders/Aly/MK_WB"
@@ -17,24 +17,6 @@ do "./codes/utility/config_macros.do"
 macro list
 
 **# Prep starting data
-
-//Data used 7th of October 2022: 0:/08akkiGH/1_DATA/MK_North_Macedonia/MK_data_raw20220201.zip - in which you find a digiwhist-mk-2022_01_31.csv
-//10th November 2022 - A new data update /08akkiGH/1_DATA/MK_North_Macedonia/MK_202211.zip
-
-// import delimited using "${data_raw}/MK_202211_1stpresentation_data/MK_202211.csv", encoding(UTF-8) clear 
-
-//18th November 2022 - Newer data update 
-// Notes from Gergo
-// i found a few hundred records that could not be inserted into the database because they contained some special characters in the description or title fields. i added proper escaping to the scraping code and this is now ok
-// scraping is finished
-// i added a new parsing class to process those assigned contracts that do not have a related contract notice or award decision. these include the 2 types that Bence highlighted from an earlier export but i also found a few other types
-
-// /08akkiGH/1_DATA/MK_North_Macedonia/MK_202211.zip
-
-// import delimited using "${data_raw}/MK_202211_20221118/MK_data_202211.csv", encoding(UTF-8) clear 
-
-//25th November 2022 - Newer data update 
-// fixed the missing bidder names issue 
 
 import delimited using "${data_raw}/MK_202211_20221125/MK_data_202211.csv", encoding(UTF-8) clear 
 
@@ -64,8 +46,6 @@ do "${codes}/bidder_matching.do"
 
 **# Merge to main
 frames reset
-// import delimited using "${data_raw}/MK_202211/MK_202211.csv", encoding(UTF-8) clear 
-// import delimited using "${data_raw}/MK_202211_20221118/MK_data_202211.csv", encoding(UTF-8) clear 
 
 import delimited using "${data_raw}/MK_202211_20221125/MK_data_202211.csv", encoding(UTF-8) clear 
 
@@ -86,21 +66,7 @@ sort bidder_id
 
 **# Add a random bidder name + id for missing bidder names 
 replace bidder_name="" if bidder_name=="null"
-/* skipped for now (29/11/22) because we basically have a contract level data, so those extra records missing a bidder name are not contract awards inspite the lot_status_being awarded
-gsort bidder_id 
-sum bidder_id
-local max `r(max)'
-cap drop x
-cap drop y
-gen y = missing(bidder_id)
-replace y  = 2 if y==1 & (!inlist(lot_status,"CANCELLED") & missing(tender_cancellationdate) & !missing(tender_publications_lastcontract))
-bys y: gen x = _n if missing(bidder_id) & !inlist(lot_status,"CANCELLED") & missing(tender_cancellationdate) & !missing(tender_publications_lastcontract)
-replace x = `max' + x if !missing(x)
 
-replace bidder_name = "bidder_"+string(x) if y==2
-replace bidder_id = x if y==2
-cap drop x y
-*/
 
 **# Calculate CRI
 do "${codes}/date_var_restructure.do"
@@ -118,14 +84,6 @@ do "${codes}/export_first_draft_data.do"
 // On 12 Feb 2023 added a second export to supplement the tender_cpvs
 // done using the matchit code on 5th of March 2023
 do "${codes}/cpv_matchit_mk.do"
-
-// use "${data}/processed/MK_202211_processed.dta", clear
-// keep persistent_id tender_id lot_id tender_title lot_title tender_cpvs market_id_num
-// replace tender_cpvs = "" if regex(tender_cpvs,"^99")
-// replace market_id_num = "" if regex(market_id_num,"^99")
-// keep if missing(tender_cpvs)
-// export delimited "${data}/processed/MK_cpvs_to_fix.csv", replace
-// do "${codes}/cpv_fix_mk.do"   // not used using python instead - also the python code wasn't used
 
 do "${codes}/export_second_draft_data.do"
 
