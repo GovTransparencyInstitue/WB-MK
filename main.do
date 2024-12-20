@@ -2,8 +2,6 @@
 Project Title: MK - Entity IDs
 Author: Aly Abdou & Klea Ibrahimi
 Date: 7th October 2022
-
-Description: This project generates entity ids for the MK data
 */
 clear all
 cap program drop _all
