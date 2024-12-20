@@ -11,6 +11,7 @@ quie replace est_price = tender_estimatedprice if missing(est_price)
 
 cap drop relprice
 quie gen relprice = bid_price/est_price
+cap drop lrelprice
 quie gen lrelprice = log(relprice)
 
 // *************************************************
@@ -69,22 +70,9 @@ count if filter_ok & filter_1lot & group_2
 // bcskew0 relprice_bc = relprice if filter_ok==1
 // lnskew0 relprice_lc = relprice if filter_ok==1
 *************************************************
-**# Sending relprice for the Yeo-Johnson transformation in python
-unique persistent_id tender_id if filter_ok & filter_1lot & group_1
-cap frame drop relprice_frame
-frame put persistent_id tender_id lrelprice filter_ok filter_1lot group_1, into(relprice_frame)
-
-frame change relprice_frame
-keep if filter_ok & filter_1lot & group_1
-keep  persistent_id tender_id relprice
-export delimited "${data}/processed/relprice.csv", replace
-
-frame change default
-// Skipped for now until I get confirmation 
-// seems like the log transformation is suffcient
-*************************************************
 **# Preparing main IV
-
+cap drop cri2
+cap drop lcri
 quie gen cri2 = cri^2
 quie gen lcri = log(cri)
 *************************************************
@@ -109,7 +97,6 @@ est store m
 estout m, keep(cri) cells(b(star fmt(3)) se) stats(N r2)
 }
 
-
 // quie reg lrelprice c.cri##c.cri $controls if $sub_sample, $options
 // est store m
 // estout m, keep(*cri) cells(b(star fmt(3)) se) stats(N r2)
@@ -120,7 +107,7 @@ estout m, keep(cri) cells(b(star fmt(3)) se) stats(N r2)
 
 **# CRI regression figures
 graph twoway (scatter lrelprice cri) (qfitci lrelprice cri, ciplot(rline)) if filter_ok==1 & filter_1lot==1 & group_1==1, title(OLS ) subtitle(`subtitle') xtitle(CRI, size(small)) ytitle(`ytitle', size(small)) legend(off)
-graph export "${output_figures}/MK_202211_lrelprice_cri_group1.png", as(png) replace	
+// graph export "${output_figures}/MK_202211_lrelprice_cri_group1.png", as(png) replace	
 
 // graph twoway (scatter lrelprice cri) (qfitci lrelprice cri, ciplot(rline)) if filter_ok==1 & filter_1lot==1 & group_2==1, title(OLS ) subtitle(`subtitle') xtitle(CRI, size(small)) ytitle(`ytitle', size(small)) legend(off)
 // graph export "${output_figures}/MK_202211_lrelprice_cri_group2.png", as(png) replace			
@@ -237,35 +224,6 @@ foreach ind in `components'{
 
 }
 
-/*
-tabstat bid_price contract_value_predsb contract_value_zerosb if $sub_sample, by(year)  stat(sum)
-total bid_price contract_value_predsb contract_value_zerosb if $sub_sample, over(year quarter)
-
-global sub_sample filter_ok==1 & filter_1lot==1 & group_1==1 & inrange(year,2011,2022)
-
-local components cri corr_singleb corr_subm corr_proc 
-// corr_decp corr_ben taxhav2 w_ycsh4
-
-cap drop total_spending_*
-foreach ind in `components'{
-		switch `ind', cases(cri corr_singleb corr_subm corr_proc corr_decp corr_ben corr_nocft taxhav2 w_ycsh4) values(cri sb sub proc dec ben nocft tx ycsh)
-		local ind_shrt $switch_return
-		
-		bys year quarter: egen total_spending_model`ind_shrt'=total(contract_value_pred`ind_shrt') if $sub_sample 
-		bys year quarter: egen total_spending_model`ind_shrt'_lb=total(contract_value_pred`ind_shrt'_lb) if $sub_sample 
-		bys year quarter: egen total_spending_model`ind_shrt'_ub=total(contract_value_pred`ind_shrt'_ub) if $sub_sample 
-		bys year quarter: egen total_spending_zero`ind_shrt'=total(contract_value_zero`ind_shrt') if $sub_sample
-		bys year quarter: egen total_spending_zero`ind_shrt'_lb=total(contract_value_zero`ind_shrt'_lb)  if $sub_sample
-		bys year quarter: egen total_spending_zero`ind_shrt'_ub=total(contract_value_zero`ind_shrt'_ub)  if $sub_sample
-		
-}
-
-sort year quarter
-br year quarter total_spending_zerosb
-	
-// collapse (sum) model=contract_value_predsb cf = contract_value_zerosb if $sub_sample, by(year quarter)
-
-*/
 *************************************************
 * Aggregation Figures (over time + over locations + Over organizations + over sectors)
 frame change default
@@ -329,24 +287,14 @@ grstyle set color economist
 grstyle set legend 2, nobox
 
 // br loss_percentsb total_spending_modelsb total_spending_zerosb
-
+* Figure 17 Potential savings after eliminating procurement corruption risks (CRI), North Macedonia, 20122-2022
+* Panel A: Half Yearly potential savings rate by eliminating CRI and other selected corruption risk indicators
 twoway (rarea loss_percentcri_lb loss_percentcri_ub qdate, fi(inten75)) (rarea loss_percentsb_lb loss_percentsb_ub qdate, fi(inten50) ) (rarea loss_percentproc_lb loss_percentproc_ub qdate, fi(inten50)) (rarea loss_percentsub_lb loss_percentsub_ub qdate, fi(inten50)) (line loss_percentcri qdate, lcolor(grey%10)) ///
 (line loss_percentsb qdate, lcolor(grey%10)) ///
 (line loss_percentproc qdate, lcolor(grey%10)) ///
 (line loss_percentsub qdate, lcolor(grey%10)) , ///
 legend(order(1 "CRI" 2 "Single bidding" 3 "Procedure type" 4 "Submission period" )) legend(rows(1) pos(6))  tlab(2011h1(1)2022h2, angle(45)  labsize(small)) ylab(0(1)8, labsize(medium)) xtitle("")  ytitle("Potential savings, %", size(medium))
 graph export "${output_figures}/Loss_quarters_1lottenders.png", as(png) width(5000) height(2500)   replace
-
-// tsline loss_percentcri loss_percentsb loss_percentnocft loss_percentproc if qdate<=yq(2022, 1), xtitle(Quarter) tlab(2011q1(2)2022q1, angle(45) labsize(vsmall))  ytitle(Loss percent)  ttext(9.2 248 "CRI" 4.1 246 "Procedure Type" 3.1 244 "Single bidding" 2.2 248 "No CFT",size(vsmall)) legend(off)  lpattern(solid dash shortdash longdash_dot)
-
-//lwidth(thin thin thin thin)
-// di yq(2021, 3)
-// legend(pos(7)) legend(label(1 "CRI (Overall)")) legend(label(2 "CRI (Emergency)"))
-
-// tsrline loss_percent_lb  loss_percent_ub  if qdate<=yq(2022, 1), xtitle(Quarter) ytitle(Loss percent)
-
-// graph export "${output_figures}/Loss_quarters_1lottenders.png", as(png)  replace
-
 
 **# Fig: Loss (MKD) by cri + indicators over quarters
 local components cri corr_singleb corr_subm corr_proc
@@ -364,7 +312,7 @@ gen loss_`ind_shrt'_lb = (total_spending_model`ind_shrt'_ub-total_spending_zero`
 replace loss_`ind_shrt'_lb = loss_`ind_shrt'_lb/1000000
 
 }
-
+* Panel B: Half Yearly potential savings in million MDK by eliminating CRI and other selected corruption risk indicators 
 twoway (rarea loss_cri_lb loss_cri_ub qdate, fi(inten75)) (rarea loss_sb_lb loss_sb_ub qdate, fi(inten50) ) (rarea loss_proc_lb loss_proc_ub qdate, fi(inten50)) (rarea loss_sub_lb loss_sub_ub qdate, fi(inten50)) (line loss_cri qdate, lcolor(grey%10)) ///
 (line loss_sb qdate, lcolor(grey%10)) ///
 (line loss_proc qdate, lcolor(grey%10)) ///
@@ -373,13 +321,8 @@ legend(order(1 "CRI" 2 "Single bidding" 3 "Procedure type" 4 "Submission period"
 graph export "${output_figures}/Loss_quarters_1lottenders_coc_abs.png", as(png)  width(5000) height(2500)   replace
 
 
-// tsline loss_cri loss_sb loss_nocft loss_proc if qdate<=yq(2022, 1), xtitle(Quarter) tlab(2011q1(2)2022q1, angle(45) labsize(vsmall))  ytitle("Cost of corruption risk, million MKD")  ttext(1000 248 "CRI" 470 247 "Procedure Type" 290 244 "Single bidding" 200 248 "No CFT",size(vsmall)) legend(off)  lpattern(solid dash shortdash longdash_dot)
-// graph export "${output_figures}/Loss_quarters_1lottenders_coc_abs.png", as(png)  replace
-
-
-// tsrline loss_sb_ub loss_sb_lb  if qdate<=yq(2022, 1), xtitle(Quarter) ytitle(Loss percent)
-
 **#Fig Aggregation of losses over locations
+* Figure 18: Distribution of potential savings (million MKD) by eliminating all procurement corruption risks (CRI) across regions in North Macedonia 2011-2022
 frame change default
 global sub_sample filter_ok==1 & filter_1lot==1 & group_1==1 & inrange(year,2011,2022)
 
@@ -396,6 +339,7 @@ di `loss_percent'
 di `loss_mill'
 
 **# Fig: Savings as a % of total spending by cri + indicators over locations
+* Figure 18: Distribution of potential savings (million MKD) by eliminating all procurement corruption risks (CRI) across regions in North Macedonia 2011-2022
 frame change default
 cap frame drop quarter
 frame copy default quarter
@@ -478,7 +422,7 @@ graph combine `combine_cmd', row(3) col(3)  colfirst title("") xcommon l1title("
 graph export "${output_figures}/Loss_quarters_1lottenders_locs.png", as(png)  replace
 
 **# FIG : Loss % from singlebidding over regions
-
+* Figure 20: Distribution of potential savings (percentage points) by eliminating single bidding corruption risk across regions in North Macedonia 2011-2022
 // grstyle set color economist   
 set scheme plotplain
 grstyle init
@@ -502,21 +446,6 @@ foreach loc in `locs'{
 
 graph combine `combine_cmd', row(3) col(3)  colfirst title("") xcommon l1title("Potential savings, % of total spending", size(small))
 graph export "${output_figures}/Loss_quarters_1lottenders_locs_sb.png", as(png)  replace
-
-// twoway `rarea_cmd' `line_cmd' , ///
-// legend(order(1 "Istočen" 2 "Jugoistočen" 3 "Jugozapaden" 4 "Pelagoniski" 5 "Pološki" 6 "Severoistočen" 7 "Skopski" 8 "Vardarski")) legend(rows(1) pos(6))  tlab(2011q1(2)2022q4, angle(45) labsize(vsmall)) ylab(0(1)8) xtitle("")  ytitle("Potential savings, %", size(small))
-// graph export "${output_figures}/Loss_quarters_1lottenders_locs.png", as(png)  replace
-
-// tsline loss_percentcri loss_percentsb loss_percentnocft loss_percentproc if qdate<=yq(2022, 1), xtitle(Quarter) tlab(2011q1(2)2022q1, angle(45) labsize(vsmall))  ytitle(Loss percent)  ttext(9.2 248 "CRI" 4.1 246 "Procedure Type" 3.1 244 "Single bidding" 2.2 248 "No CFT",size(vsmall)) legend(off)  lpattern(solid dash shortdash longdash_dot)
-
-//lwidth(thin thin thin thin)
-// di yq(2021, 3)
-// legend(pos(7)) legend(label(1 "CRI (Overall)")) legend(label(2 "CRI (Emergency)"))
-
-// tsrline loss_percent_lb  loss_percent_ub  if qdate<=yq(2022, 1), xtitle(Quarter) ytitle(Loss percent)
-
-// graph export "${output_figures}/Loss_quarters_1lottenders.png", as(png)  replace
-
 
 **# Fig: Loss (MKD) by cri  over quarters by locations
 local components cri corr_singleb corr_subm corr_proc 
@@ -555,6 +484,7 @@ graph combine `combine_cmd', row(3) col(3) colfirst title("") xcommon l1title("P
 graph export "${output_figures}/Loss_quarters_1lottenders_amt_locs.png", as(png)  replace
 
 **# total loss % and in MKD calculation over locations
+* Figure 19: Distribution of potential savings (percentage points) by eliminating all procurement corruption risks (CRI) across regions in North Macedonia 2011-2022
 // total spending 
 encode buyer_loc,gen(buyer_loc_num)
 levelsof buyer_loc_num,local(locs)
@@ -593,14 +523,6 @@ di `loss_mill'
 di "***********"
 }
 
-// Istočen 5.9 - 644 million
-// Jugoistočen 6.12 - 610 million
-// Jugozapaden 6.8 - 644 million
-// Pelagoniski 5.8 - 848 million
-// Pološki 6.13 - 669 million
-// Severoistočen 7 -471 million
-// Skopski 5 - 11.2 billion
-// Vardarski 6.3 - 501 million
 
 **#Fig Aggregation of losses over sectors
 
@@ -659,36 +581,8 @@ grstyle init
 grstyle set color economist
 grstyle set legend 2, nobox
 
-/*
-cap drop market_id_str
-decode market_id, gen(market_id_str)
-// do "${codes_utility}/convert_str_cpv_to_sectors.do" market_id_str
-tab market_id_str
-// market_id
-// 09 2
-// 45 23
-// 99 46
-
-local components cri corr_singleb corr_submp corr_proc
-foreach ind in `components'{
-switch `ind', cases(cri corr_singleb corr_submp corr_proc) values(cri sb sub proc)
-local ind_shrt $switch_return
-
-sort total_spending_model`ind_shrt'
-cap drop order
-gen order = _n
-
-graph hbar (sum ) total_spending_zero`ind_shrt' loss_`ind_shrt' if !inlist(market_id,2,23,46),  over(market_id_str, label(labs(vsmall)) sort(order) ) stack legend(off)   bar(2, fcolor(red%60) lwidth(none)) saving("${output_figures}/Stata_format/sectors_loss1.gph", replace)
-
-graph hbar (sum ) total_spending_zero`ind_shrt' loss_`ind_shrt' if inlist(market_id,2,23),  over(market_id_str, label(labs(vsmall)) sort(order) ) stack legend(off)  ytitle("Total spending, billion MKD", size(vsmall)) bar(2, fcolor(red%60) lwidth(none)) saving("${output_figures}/Stata_format/sectors_loss2.gph", replace)
-//label(angle(180))
-
-graph combine "${output_figures}/Stata_format/sectors_loss1.gph" "${output_figures}/Stata_format/sectors_loss2.gph", row(2) col(1)  iscale(*0.6) ysize(5)
-
-graph export "${output_figures}/Loss_sectors_1lottenders_percent`ind_shrt'.png", as(png)  replace
-}
-*/
 **# Fig: Loss as a % of total spending by cri + indicators over sectors
+* Figure 21: Distribution of potential savings (% of total spending by eliminating all procurement corruption risks (CRI) across regions in North Macedonia 2011-2022 – Top 10 CPV divisions by highest saving potential
 cap drop market_id_str
 decode market_id, gen(market_id_str)
 cap drop market_id
@@ -766,164 +660,5 @@ twoway (rbar loss_percentcri_lb loss_percentcri_ub market_enc if !inlist(market_
     xtitle("") ///
     xlabel(`var2values', valuelabels labs(small) angle(40) alternate)
 graph export "${output_figures}/Loss_sectors_1lottenders_percent_Actualcri.png", as(png) width(3000) height(1800)  replace
-//	
-// twoway (rbar loss_percentcri_lb loss_percentcri_ub market_enc if !inlist(market_enc,28) , barwidth(0.7)) (scatter loss_percentcri market_enc  if !inlist(market_enc,28), mstyle(p7) mcolor(black%30) msize(*0.7)), legend(label(1 "Loss upper/lower limits") label(2 "Average value") rows(1) pos(6)) ytitle("Estimated potential savings from total spending lost (%)", size(small)) xtitle("") xlabel(`var2values', valuelabels labs(vsmall) angle(45) alternate)  
-// // preserve 
-// // drop if inlist(market_id,46)
-// twoway (rbar loss_percentcri_lb loss_percentcri_ub market_enc if !inlist(market_enc,28) , barwidth(0.7))  (scatter loss_percentcri market_enc  if !inlist(market_enc,28), mstyle(p7) mcolor(black%30) msize(*0.7) )   , legend(off) ytitle("Estimated potential savings from total spending lost (%)", size(vsmall)) xtitle("") xlabel(`var2values', valuelabels labs(vsmall) angle(45) alternate) xscale(range(1 20)) 
-// restore
-// graph export "${output_figures}/Loss_sectors_1lottenders_percent_Actualcri.png", as(png)  replace
-
-/*
-**# Fig: Total spending and cost of corruption risk by cri + indicators over locations
-frame change default
-tab buyer_nuts, m
-
-
-global sub_sample filter_ok==1 & filter_1lot==1 & group_1==1 & inrange(year,2011,2022)
-
-cap frame drop locations
-frame copy default locations
-frame change locations
-
-keep if $sub_sample
-
-gen x = 1
-local components cri corr_singleb corr_nocft corr_proc
-foreach ind in `components'{
-			switch `ind', cases(cri corr_singleb corr_nocft corr_proc) values(cri sb nocft proc)
-		local ind_shrt $switch_return
-local collapse_cmd `collapse_cmd' total_spending_model`ind_shrt'=contract_value_pred`ind_shrt' total_spending_model`ind_shrt'_lb=contract_value_pred`ind_shrt'_lb total_spending_model`ind_shrt'_ub=contract_value_pred`ind_shrt'_ub total_spending_zero`ind_shrt'=contract_value_zero`ind_shrt' total_spending_zero`ind_shrt'_lb=contract_value_zero`ind_shrt'_lb total_spending_zero`ind_shrt'_ub=contract_value_zero`ind_shrt'_ub 
-}
-
-collapse (sum) `collapse_cmd' (count) count = x, by(buyer_nuts ) fast
-
-
-local components cri corr_singleb corr_nocft corr_proc
-
-foreach ind in `components'{
-switch `ind', cases(cri corr_singleb corr_nocft corr_proc) values(cri sb nocft proc)
-local ind_shrt $switch_return
-gen loss_percent`ind_shrt' = ((total_spending_model`ind_shrt'-total_spending_zero`ind_shrt')/(total_spending_model`ind_shrt'))*100
-gen loss_percent`ind_shrt'_ub = ((total_spending_model`ind_shrt'_lb-total_spending_zero`ind_shrt'_lb)/(total_spending_model`ind_shrt'_lb))*100
-gen loss_percent`ind_shrt'_lb = ((total_spending_model`ind_shrt'_ub-total_spending_zero`ind_shrt'_ub)/(total_spending_model`ind_shrt'_ub))*100
-
-switch `ind', cases(cri corr_singleb corr_nocft corr_proc) values(cri sb nocft proc)
-local ind_shrt $switch_return
-cap drop loss_`ind_shrt' loss_`ind_shrt'_ub loss_`ind_shrt'_lb
-gen loss_`ind_shrt' = (total_spending_model`ind_shrt'-total_spending_zero`ind_shrt')
-replace loss_`ind_shrt' = loss_`ind_shrt'/1000000000
-gen loss_`ind_shrt'_ub = (total_spending_model`ind_shrt'_lb-total_spending_zero`ind_shrt'_lb)
-replace loss_`ind_shrt'_ub = loss_`ind_shrt'_ub/1000000000
-gen loss_`ind_shrt'_lb = (total_spending_model`ind_shrt'_ub-total_spending_zero`ind_shrt'_ub)
-replace loss_`ind_shrt'_lb = loss_`ind_shrt'_lb/1000000000
-}
-
-local components cri corr_singleb corr_nocft corr_proc
-foreach ind in `components'{
-switch `ind', cases(cri corr_singleb corr_nocft corr_proc) values(cri sb nocft proc)
-local ind_shrt $switch_return
-replace total_spending_zero`ind_shrt' = total_spending_zero`ind_shrt'/1000000000
-}
-
-//Removing the missing category as it inflates the figures
-grstyle set color economist
-drop if missing(buyer_nuts)
-
-cap drop buyer_loc
-gen buyer_loc="Vardarski" if buyer_nuts=="MK001"
-replace buyer_loc="Istočen" if buyer_nuts=="MK002"
-replace buyer_loc="Jugozapaden" if buyer_nuts=="MK003"
-replace buyer_loc="Jugoistočen" if buyer_nuts=="MK004"
-replace buyer_loc="Pelagoniski" if buyer_nuts=="MK005"
-replace buyer_loc="Pološki" if buyer_nuts=="MK006"
-replace buyer_loc="Severoistočen" if buyer_nuts=="MK007"
-replace buyer_loc="Skopski" if buyer_nuts=="MK008"
-
-
-local components cri corr_singleb corr_nocft corr_proc
-foreach ind in `components'{
-switch `ind', cases(cri corr_singleb corr_nocft corr_proc) values(cri sb nocft proc)
-local ind_shrt $switch_return
-
-sort total_spending_model`ind_shrt'
-cap drop order
-gen order = _n
-
-graph hbar (sum ) total_spending_zero`ind_shrt' loss_`ind_shrt' if !inlist(buyer_loc,"Skopski") ,  over(buyer_loc, label(labs(small)) sort(order) ) stack legend(off)   bar(2, fcolor(red%60) lwidth(none)) saving("${output_figures}/Stata_format/locations_loss1.gph", replace)
-
-graph hbar (sum ) total_spending_zero`ind_shrt' loss_`ind_shrt' if inlist(buyer_loc,"Skopski"),  over(buyer_loc, label(labs(small)) sort(order) ) stack legend(off)   bar(2, fcolor(red%60) lwidth(none))saving("${output_figures}/Stata_format/locations_loss2.gph", replace)
-//label(angle(180))
-
-graph combine "${output_figures}/Stata_format/locations_loss1.gph" "${output_figures}/Stata_format/locations_loss2.gph", row(2) col(1)  iscale(*0.6) ysize(5)
-
-graph export "${output_figures}/Loss_locations_1lottenders_percent`ind_shrt'.png", as(png)  replace
-}
-
-
-**# Fig: Loss as a % of total spending by cri + indicators over locations
-
-cap drop buyer_loc_enc
-gsort loss_percentcri
-cap label drop lab2
-gen buyer_loc_enc = _n
-//  CREATE A VALUE LABEL FOR VAR2 FROM THE VALUES OF VAR1
-forvalues i = 1/`=_N' {
- label define lab2   `=buyer_loc_enc[`i']'    "`=buyer_loc[`i']'", add
-}
-label values buyer_loc_enc lab2
-
-levelsof buyer_loc_enc, local(var2values)
-
-// preserve 
-// drop if inlist(market_id,46)
-twoway  (rbar loss_percentcri_lb loss_percentcri_ub buyer_loc_enc  , barwidth(0.7)) (scatter loss_percentcri buyer_loc_enc , mstyle(p7) mcolor(black%30) msize(*0.7) )   , legend(off) ytitle("Estimated percentage of total spending lost to corruption", size(vsmall)) xtitle("") xlabel(`var2values', valuelabels labs(vsmall) alternate) xscale(range(1 4)) 
-// restore
-
-graph export "${output_figures}/Loss_locations_1lottenders_percent_Actualcri.png", as(png)  replace
-
-**# Mapiing Loss Percentage 
-/*
-frame change default
-cap frame drop map_loss
-frame create map_loss 
-frame change map_loss
-
-shp2dta using "${data}/utility/\North_Macedonia_shapefile/macedoniageojson.shp", database("${data}/utility/\North_Macedonia_shapefile/macedoniageojson") coordinates("${data}/utility/North_Macedonia_shapefile/MK_coord") replace
-
-use "${data}/utility/North_Macedonia_shapefile/macedoniageojson.dta", clear
-gen iso = NAME
-do "${codes}/utility/country-to-iso.do" iso 
-tab NAME if missing(iso)
-rename iso country
-
-frlink 1:1 country, frame(default) gen(lnk)
-frget cri_total_2012_2021=cri_total_2012_2021 , from(lnk)
-drop lnk
-// drop country
-
-cap frame drop map_coord
-frame create map_coord 
-frame change map_coord
-use "${data}/utility/North_Macedonia_shapefile/MK_coord.dta", clear
-bys _ID: egen mean_x = mean(_X)
-bys _ID: egen mean_y = mean(_Y)
-duplicates drop _ID , force
-
-frame change map
-cap drop lnk
-frlink 1:1 _ID, frame(map_coord) gen(lnk)
-frget mean_x=mean_x , from(lnk)
-frget mean_y=mean_y , from(lnk)
-
-drop lnk
-
-spmap cri_total_2012_2021 using "${data}/utility/shp_/EU_coord" if !missing(cri_total_2012_2021), id(_ID) fcolor(Reds) ocolor(none ..)  label(xc(mean_x) yc(mean_y) label(country) select(keep if cri_total_2012_2021 != .) size(*0.85 ..) position(2 3))   legstyle(0) legtitle(Higher CRI) 
-// title(Composite Risk Score in Europe, size(*0.8) bexpand) subtitle(2012-2021, size(*0.8))
-//  graph export "${output_figures}\CRI_2012_2021_EU.png", as(png) name("CRI_2012_2021_EU")
-*/
-*****************************************************
-*/
-
 
 
