@@ -4,90 +4,113 @@
 ## Project Description:
 This project focuses on analyzing the public procurement data  for the MK (North Macedonia) data. The script performs data preprocessing, matching, and analysis to process these entities efficiently. The process also handles  specific calculations such as corruption risks (CRI) and Loss due to corruption risk. It also creates the files used for Network analysis
 
+## Data Access:
+Reach out to info@govtransparency.eu to access the data folder
+
+
 ---
 
-## Steps Involved in the Process:
+## Main processes:
 
-### 1. **Project Initialization**
-   - Set up project directories and load necessary macros:
+### 1. **Data Exploration**
+   - These scripts explore the data and create CRI distribution figures in the manuscript:
      ```stata
-     init_project "C:/Ourfolders/Aly" "MK_WB"
-     ```
+     do "./codes/utility/descriptives.do"
+     do "./codes/utility/figures_paper.do"
+     do "./codes/utility/figures_corruption_risks.do"
 
-### 2. **Load Global Macros**
-   - Loads configuration macros from a separate file:
-     ```stata
-     do "./codes/utility/config_macros.do"
-     macro list
      ```
-
-### 3. **Import and Preprocess Raw Data**
-   - The script loads data from different dates (e.g., 7th October 2022, 10th November 2022, 25th November 2022) and imports CSV files containing MK data.
-   - Example of data import:
-     ```stata
-     import delimited using "${data_raw}/MK_202211_20221125/MK_data_202211.csv", encoding(UTF-8) clear
-     ```
-
-### 4. **Data Cleaning and Transformation**
-   - Several data frames are created for buyers and bidders:
-     ```stata
-     frame put buyer_masterid buyer_name buyer_city buyer_country buyer_postcode, into(buyer)
-     frame put bidder_masterid bidder_name bidder_city bidder_country, into(bidder)
-     ```
-   - Missing values for `buyer_masterid` and `bidder_masterid` are dropped and data saved:
-     ```stata
-     drop if missing(`frame'_masterid)
-     save "${data_processed}/MK_`frame'_raw.dta", replace
-     ```
-
-### 5. **City Standardization**
-   - Standardizes city names using API services to ensure consistency:
-     ```stata
-     do "${codes}/city_standardization.do"
-     ```
-
-### 6. **Buyer and Bidder Matching **
-   - Matches buyer and bidder entities based on predefined rules to standardize their ids:
-     ```stata
-     do "${codes}/buyer_matching.do"
-     do "${codes}/bidder_matching.do"
-     ```
-
-### 7. **Merging Data**
-   - Merges buyer and bidder IDs with the main dataset:
-     ```stata
-     merge m:1 buyer_masterid using "${data_processed}/MK_buyer_id_match.dta", nogen keep(1 3) keepusing(buyer_id_assigned buyer_country_api...)
-     ```
-
-### 8. **Randomly Assign Bidder IDs for Missing Names**
-   - For records missing bidder names, random names and IDs are generated:
-     ```stata
-     replace bidder_name = "bidder_"+string(x) if y==2
-     ```
-
-### 9. **CRI Calculation**
-   - CRI (Corruption Risk Index) calculations are performed by generating new variables and applying transformations:
-     ```stata
-     do "${codes}/gen_cri.do" "MK"
-     ```
-
-### 10. **Export Processed Data**
-   - The processed data is exported for further use:
-     ```stata
-     save "${data}/processed/MK_202211_processed.dta", replace
-     ```
-
-### 11. **Improve CPV Codes**
-   - A separate script is used to enhance CPV codes, involving the matchit algorithm:
-     ```stata
-     do "${codes}/cpv_matchit_mk.do"
-     ```
-
-### 12. **Cost of Corruption Risk (CoC) Calculation**
-   - A script to calculate the cost of corruption risks is executed:
+### 2. **Cost of Corruption Risk (CoC) Calculation**
+   - A script to calculate the cost of corruption risks and exports tables/figures:
      ```stata
      do "${codes}/coc_calculations.do"
      ```
+### 3. **Network Analysis**
+- This section explores the MK data as a network between buyers and suppliers. The following scripts are available for this purpose:
+  **Python Notebook:** `Create_gephi_edgelist.ipynb`
+  **Python Notebook:** `Graph Exploration.ipynb`  
+
+
+
+ ## Figures Map
+
+ ###### Figures in `figures_paper.do`
+ **Figure 1: Distribution of public contracts over time**
+ **[Line 37] Panel A:** Number of tenders and awarded contracts in North Macedonia, 2011-2022  
+ **[Line 78] Panel B:** Total monthly spending in North Macedonia, 2011-2022  
+
+ **Figure 2: Distributions of awarded contracts by contract type**
+ **[Line 100] Panel A:** Yearly distribution of public contracts in North Macedonia, 2011-2022  
+ **[Line 115] Panel B:** Yearly spending by contract type in North Macedonia, 2011-2022  
+
+ **Figure 3: Distributions of awarded contracts across geographical regions**
+ **[Line 144] Panel A:** Yearly distribution of public contracts in North Macedonia, 2011-2022  
+ **[Line 156] Panel B:** Yearly spending by contract type in North Macedonia, 2011-2022  
+
+ **Figure 4:** **[Line 180]** Yearly distribution of procurement organizations in North Macedonia, 2011-2022  
+ Figures in `ted_cri_figure_export.do`
+  **Figure 14:**   Average single bidding rate in North Macedonia and the EU (TED data)
+
+ Figures in `figures_corruption_risks.do`
+ **Figure 5:** **[Line 72]** Distribution of awarded contracts by their average CRI , North Macedonia, 2011-2022
+ **Figure 6:** **[Line 89]** Distribution of procurement authorities by their average CRI , North Macedonia, 2011-2022
+ **Figure 7:** **[Line 115]** Distribution of awarded firms by their average CRI, North Macedonia, 2011-2022.
+ **Figure 8:** **[Line 140]** Average CRI by year, North Macedonia, 2011-2022
+ **Figure 9:** **[Line 152]** Average CRI per contract trends across regions, North Macedonia, 2011-2022
+ **Figure 10:** **[Line 179]** CRI by industry, (number of contracts>1000)
+ **Figure 11:** **[Line 184]** CRI trends for the construction sector compared to the other sectors, 2011-2022.
+ **Figure 12:** **[Line 202]** CRI trends for the health sector compared to the other sectors, 2011-2022
+ **Figure 13:** **[Line 226]** Annual trends for individual red flags
+
+ **Figure 15: Distribution and spending of multi-lot and single-lot tenders**
+ **[Line 220] Panel A:** Annual distribution of tenders across multi-lot and single-lot tenders in North Macedonia, 2011-2022  
+ **[Line 235] Panel B:** Annual total spending in multi-lot and single-lot tenders in North Macedonia, 2011-2022  
+
+ **Figure 16:**
+ **[Line 253]** The distribution of the logarithm of relative contract value in single-lot tenders  
+
+ **Figure 17: Potential savings after eliminating procurement corruption risks (CRI), North Macedonia, 20122-2022**
+ **[Line 291] Panel A:** Half Yearly potential savings rate by eliminating CRI and other selected corruption risk indicators  
+ **[Line 315] Panel B:** Half Yearly potential savings in million MDK by eliminating CRI and other selected corruption risk indicators  
+
+ **Figure 18:**
+ **[Line 342]** Distribution of potential savings (million MKD) by eliminating all procurement corruption risks (CRI) across regions in North Macedonia, 2011-2022  
+
+ **Figure 19:**
+ **[Line 487]** Distribution of potential savings (percentage points) by eliminating all procurement corruption risks (CRI) across regions in North Macedonia, 2011-2022  
+
+ **Figure 20:**
+ **[Line 425]** Distribution of potential savings (percentage points) by eliminating single bidding corruption risk across regions in North Macedonia, 2011-2022  
+
+ **Figure 21:**
+ **[Line 584]** Distribution of potential savings (% of total spending) by eliminating all procurement corruption risks (CRI) across regions in North Macedonia, 2011-2022 – Top 10 CPV divisions by highest saving potential  
+
+
+ Figures in `coc_calculations.do`
+
+ **Figure 17:**
+ **[Line 291] Panel A:** Half Yearly potential savings rate by eliminating CRI and other selected corruption risk indicators  
+ **[Line 315] Panel B:** Half Yearly potential savings in million MDK by eliminating CRI and other selected corruption risk indicators  
+
+ **Figure 18:**
+ **[Line 342]** Distribution of potential savings (million MKD) by eliminating all procurement corruption risks (CRI) across regions in North Macedonia, 2011-2022  
+
+ **Figure 19:**
+ **[Line 487]** Distribution of potential savings (percentage points) by eliminating all procurement corruption risks (CRI) across regions in North Macedonia, 2011-2022  
+
+ **Figure 20:**
+ **[Line 425]** Distribution of potential savings (percentage points) by eliminating single bidding corruption risk across regions in North Macedonia, 2011-2022  
+
+ **Figure 21:**
+ **[Line 584]** Distribution of potential savings (% of total spending) by eliminating all procurement corruption risks (CRI) across regions in North Macedonia, 2011-2022 – Top 10 CPV divisions by highest saving potential  
+
+ Network Figures in `Graph Exploration.ipynb`
+
+ **Figure 23:**  Network Communities in the Public Procurement Network of North Macedonia (2011-2022)  
+ **Figure 24:**  Community Split Based on Edge CRI Percentile in North Macedonia's Procurement Network (2011-2022)  
+ **Figure 25:**  Procurement network representation before and after the government change in North Macedonia  
+ **Figure 26:**  Construction Procurement network representation before and after the government change in North Macedonia, 2011-2022  
+ **Figure 27:**  Ego network of the largest procurement authority in the construction sector before and after the government change in North Macedonia, 2011-2022  
 
 ## Network Analysis: Creation of Node and Edge Lists
 
@@ -114,14 +137,5 @@ The steps to prepare and visualize the network in Gephi include:
 
 4. **Visual Exploration**: Once the network is loaded into Gephi, it can be explored interactively to uncover insights about the structure of the procurement relationships. For example, we can identify clusters of closely connected buyers and suppliers, or detect potential isolated organizations.
 
-### Network Metrics Analysis
-
-After visualizing the network in Gephi, the Python Jupyter notebook is used to perform more in-depth analysis of the network metrics. The notebook loads the node and edge lists and calculates various network properties such as:
-
-- **Centrality**: Measures how central or important a node is within the network. Nodes with high centrality play a crucial role in connecting different parts of the network.
-- **Modularity**: Identifies communities or clusters within the network, where nodes are more connected to each other than to nodes in other communities.
-- **Clustering**: Quantifies the degree to which nodes tend to cluster together.
-
-These network metrics provide insights into the structure and functioning of the procurement network, highlighting key organizations and potential areas of risk.
 
 ---
