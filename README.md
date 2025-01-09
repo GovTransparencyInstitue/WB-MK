@@ -1,11 +1,15 @@
 # WB MK  Overview
 
-
 ## Project Description:
 This project focuses on analyzing the public procurement data  for the MK (North Macedonia) data. The script performs data preprocessing, matching, and analysis to process these entities efficiently. The process also handles  specific calculations such as corruption risks (CRI) and Loss due to corruption risk. It also creates the files used for Network analysis
 
-## Data Access:
-Reach out to info@govtransparency.eu to access the data folder
+## Data Availability Statement:
+The public procurement contracts data is publicly availble from **https://e-nabavki.gov.mk**. GTI collects the procurment data bi-anually. THe version we use was scraped in December 2022. GTI compiled and mastered the publicly availble data. For this project, we used the cleaned and mastered version of the North Macedonian public procurment contracts data. The publicly accessible link for each contract is stored in the *notice_url* and *tender_publications_lastcontract* columns, they refer to the tender notice and contract award notice respectively.
+Reach out to info@govtransparency.eu to access the data folder. Once received, you can place the data in the *data/processed* folder and all the scripts should read from that location.
+
+You will receive 2 datasets
+1) MK_202212_processed.dta: This is the main dataset used for analysis. It is a mastered version of the North Macedeonian public procurment contract level data.  
+2) TED_yearly_CRI_w_MK_update.dta: This dataset is used to plot the CRI/single bidding country averages.
 
 
 ---
@@ -18,7 +22,6 @@ Reach out to info@govtransparency.eu to access the data folder
      do "./codes/utility/descriptives.do"
      do "./codes/utility/figures_paper.do"
      do "./codes/utility/figures_corruption_risks.do"
-
      ```
 ### 2. **Cost of Corruption Risk (CoC) Calculation**
    - A script to calculate the cost of corruption risks and exports tables/figures:
@@ -29,8 +32,6 @@ Reach out to info@govtransparency.eu to access the data folder
 - This section explores the MK data as a network between buyers and suppliers. The following scripts are available for this purpose:
   **Python Notebook:** `Create_gephi_edgelist.ipynb`
   **Python Notebook:** `Graph Exploration.ipynb`  
-
-
 
  ## Figures Map
 
