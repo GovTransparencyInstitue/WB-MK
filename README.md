@@ -68,15 +68,15 @@ Detailed validation for each indicator can be found in `MK_cri_validation.do`
  Figures in `ted_cri_figure_export.do`
   **Figure 14:**   Average single bidding rate in North Macedonia and the EU (TED data)
 
- Figures in `figures_corruption_risks.do`
- **Figure 5:** **[Line 72]** Distribution of awarded contracts by their average CRI , North Macedonia, 2011-2022
- **Figure 6:** **[Line 89]** Distribution of procurement authorities by their average CRI , North Macedonia, 2011-2022
- **Figure 7:** **[Line 115]** Distribution of awarded firms by their average CRI, North Macedonia, 2011-2022.
- **Figure 8:** **[Line 140]** Average CRI by year, North Macedonia, 2011-2022
- **Figure 9:** **[Line 152]** Average CRI per contract trends across regions, North Macedonia, 2011-2022
- **Figure 10:** **[Line 179]** CRI by industry, (number of contracts>1000)
- **Figure 11:** **[Line 184]** CRI trends for the construction sector compared to the other sectors, 2011-2022.
- **Figure 12:** **[Line 202]** CRI trends for the health sector compared to the other sectors, 2011-2022
+ Figures in `figures_corruption_risks.do`  
+ **Figure 5:** **[Line 72]** Distribution of awarded contracts by their average CRI , North Macedonia, 2011-2022  
+ **Figure 6:** **[Line 89]** Distribution of procurement authorities by their average CRI , North Macedonia, 2011-2022  
+ **Figure 7:** **[Line 115]** Distribution of awarded firms by their average CRI, North Macedonia, 2011-2022.  
+ **Figure 8:** **[Line 140]** Average CRI by year, North Macedonia, 2011-2022  
+ **Figure 9:** **[Line 152]** Average CRI per contract trends across regions, North Macedonia, 2011-2022  
+ **Figure 10:** **[Line 179]** CRI by industry, (number of contracts>1000)  
+ **Figure 11:** **[Line 184]** CRI trends for the construction sector compared to the other sectors, 2011-2022.  
+ **Figure 12:** **[Line 202]** CRI trends for the health sector compared to the other sectors, 2011-2022  
  **Figure 13:** **[Line 226]** Annual trends for individual red flags
 
  **Figure 15: Distribution and spending of multi-lot and single-lot tenders**
@@ -118,7 +118,7 @@ Detailed validation for each indicator can be found in `MK_cri_validation.do`
  **Figure 20:**
  **[Line 425]** Distribution of potential savings (percentage points) by eliminating single bidding corruption risk across regions in North Macedonia, 2011-2022  
 
- **Figure 21:** 
+ **Figure 21:**
  **[Line 584]** Distribution of potential savings (% of total spending) by eliminating all procurement corruption risks (CRI) across regions in North Macedonia, 2011-2022 – Top 10 CPV divisions by highest saving potential  
 
  Network Figures in `Graph Exploration.ipynb`
