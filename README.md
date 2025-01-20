@@ -118,7 +118,7 @@ Detailed validation for each indicator can be found in `MK_cri_validation.do`
  **Figure 20:**
  **[Line 425]** Distribution of potential savings (percentage points) by eliminating single bidding corruption risk across regions in North Macedonia, 2011-2022  
 
- **Figure 21:**
+ **Figure 21:** 
  **[Line 584]** Distribution of potential savings (% of total spending) by eliminating all procurement corruption risks (CRI) across regions in North Macedonia, 2011-2022 – Top 10 CPV divisions by highest saving potential  
 
  Network Figures in `Graph Exploration.ipynb`
