@@ -4,14 +4,23 @@
 This project focuses on analyzing the public procurement data  for the MK (North Macedonia) data. The script performs data preprocessing, matching, and analysis to process these entities efficiently. The process also handles  specific calculations such as corruption risks (CRI) and Loss due to corruption risk. It also creates the files used for Network analysis
 
 ## Data Availability Statement:
-The public procurement contracts data is publicly available from **https://e-nabavki.gov.mk**. GTI collects the procurement data bi-annually. The version we use was scraped in December 2022. GTI compiled and mastered the publicly available data. For this project, we used the cleaned and mastered version of the North Macedonian public procurment contracts data. The publicly accessible link for each contract is stored in the *notice_url* and *tender_publications_lastcontract* columns, they refer to the tender notice and contract award notice respectively.
-Reach out to info@govtransparency.eu to access the data folder. Once received, you can place the data in the *data/processed* folder and all the scripts should read from that location.
+
+The public procurement contracts data is publicly available from **[https://e-nabavki.gov.mk](https://e-nabavki.gov.mk)**. GTI collects the procurement data bi-annually, and the version used in this project was scraped in December 2022. GTI compiled and mastered the publicly available data. For this project, we utilized the cleaned and mastered version of the North Macedonian public procurement contracts data.
+
+The publicly accessible links for each contract is stored in the following columns:
+- **`notice_url`**: Refers to the tender notice.
+- **`tender_publications_lastcontract`**: Refers to the contract award notice.
+
+To access the data folder, please reach out to **info@govtransparency.eu**. Once received, place the data in the `data/processed` folder to ensure all scripts function correctly.
 
 You will receive 2 datasets
 1) MK_202212_processed.dta: This is the main dataset used for analysis. It is a mastered version of the North Macedonian public procurement contract level data.  
 2) MK_202212_processed.csv.gz: Same data as above in csv.gz format. We use this version for the Network exploration codes.   
 2) TED_yearly_CRI_w_MK_update.dta: This dataset is used to plot the CRI/single bidding country averages.
 
+### Important Notes:
+- **Raw Data**: We are unable to provide the raw data and code used to generate the files. However, the process of compiling the North Macedonian and the Tenders Electronic Daily TED datasets (used for CRI comparisons) is detailed in the following publication:
+  > Fazekas, M., Tóth, B., Abdou, A., & Al-Shaibani, A. (2024). Global Contract-level Public Procurement Dataset. *Data in Brief, 54*, 110412. [https://www.sciencedirect.com/science/article/pii/S2352340924003810#sec0004](https://www.sciencedirect.com/science/article/pii/S2352340924003810#sec0004)
 
 ---
 
