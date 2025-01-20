@@ -137,6 +137,7 @@ estout m, keep(*.`comp'_x) cells(b(star fmt(3)) se) stats(N r2)
 global sub_sample filter_ok==1 & filter_1lot==1 & group_1==1
 tab corr_proc if filter_ok & filter_1lot, m
 tab corr_proc if $sub_sample, m
+cap drop xcorr_proc
 gen xcorr_proc = corr_proc
 replace xcorr_proc =1 if xcorr_proc==0.5 & $sub_sample
 tab xcorr_proc if $sub_sample, m
@@ -240,7 +241,7 @@ keep if $sub_sample
 
 local components cri corr_singleb corr_subm corr_proc 
 // corr_decp corr_ben taxhav2 w_ycsh4
-
+local collapse_cmd ""
 foreach ind in `components'{
 		switch `ind', cases(cri corr_singleb corr_subm corr_proc corr_decp corr_ben corr_nocft taxhav2 w_ycsh4) values(cri sb sub proc dec ben nocft tx ycsh)
 		local ind_shrt $switch_return
@@ -323,12 +324,12 @@ graph export "${output_figures}/Loss_quarters_1lottenders_coc_abs.png", as(png) 
 
 **#Fig Aggregation of losses over locations
 * Figure 18: Distribution of potential savings (million MKD) by eliminating all procurement corruption risks (CRI) across regions in North Macedonia 2011-2022
-frame change default
+// frame change default
 global sub_sample filter_ok==1 & filter_1lot==1 & group_1==1 & inrange(year,2011,2022)
 
 **# total loss % and in MKD calculation
 // total spending 
-frame change quarter
+// frame change quarter
 total total_spending_modelcri 
 local totalmodel= r(table)[1,1]
 total total_spending_zerocri 
@@ -347,9 +348,14 @@ frame change quarter
 
 keep if $sub_sample
 
+cap drop half
+gen half = 1
+replace half = 2 if month>=6
+
 local components cri corr_singleb corr_subm corr_proc 
 // corr_decp corr_ben taxhav2 w_ycsh4
 
+local collapse_cmd  ""
 foreach ind in `components'{
 		switch `ind', cases(cri corr_singleb corr_subm corr_proc corr_decp corr_ben corr_nocft taxhav2 w_ycsh4) values(cri sb sub proc dec ben nocft tx ycsh)
 		local ind_shrt $switch_return
@@ -357,11 +363,7 @@ foreach ind in `components'{
 local collapse_cmd `collapse_cmd' total_spending_model`ind_shrt'=contract_value_pred`ind_shrt' total_spending_model`ind_shrt'_lb=contract_value_pred`ind_shrt'_lb total_spending_model`ind_shrt'_ub=contract_value_pred`ind_shrt'_ub total_spending_zero`ind_shrt'=contract_value_zero`ind_shrt' total_spending_zero`ind_shrt'_lb=contract_value_zero`ind_shrt'_lb total_spending_zero`ind_shrt'_ub=contract_value_zero`ind_shrt'_ub 
 }
 
-cap drop half
-gen half = 1
-replace half = 2 if month>=6
 
-// collapse (sum) `collapse_cmd', by(buyer_nuts year quarter) fast
 collapse (sum) `collapse_cmd', by(buyer_nuts year half) fast
 drop if missing(buyer_nuts)
 
@@ -403,6 +405,7 @@ grstyle init
 grstyle set color economist
 grstyle set legend 2, nobox
 
+cap mkdir "${output_figures}/Stata_format"
 levelsof buyer_loc, local(locs)
 foreach loc in `locs'{
     di "`loc'"
@@ -539,6 +542,7 @@ frame change sectors
 keep if $sub_sample
 gen x = 1
 local components cri corr_singleb corr_submp corr_proc
+local collapse_cmd ""
 foreach ind in `components'{
 			switch `ind', cases(cri corr_singleb corr_submp corr_proc) values(cri sb sub proc)
 		local ind_shrt $switch_return
@@ -662,3 +666,4 @@ twoway (rbar loss_percentcri_lb loss_percentcri_ub market_enc if !inlist(market_
 graph export "${output_figures}/Loss_sectors_1lottenders_percent_Actualcri.png", as(png) width(3000) height(1800)  replace
 
 
+frame change default

@@ -46,8 +46,8 @@ tsline tender_tag filter_ok , ///
 graph export "${output_figures}/MK_202211_data_monthly_tenders_contracts.png", as(png) width(3000) height(1800)  replace	
 
 
-total tender_tag //174,324
-total filter_ok //267,427
+total tender_tag 
+total filter_ok 
 
 **# Fig: Summation of contract value
 * Figure 1: Distribution of public contracts over time
@@ -82,11 +82,11 @@ tsline bid_price_bil , ///
     lpattern(solid) ///
 	ylabel(, format(%9.0fc) ///
 	)
-//     legend(label(1 "Tenders") label(2 "Contracts") rows(1) pos(6)) ///
+
 	
 graph export "${output_figures}/MK_202211_data_monthly_total_value.png", as(png) width(3000) height(1800)  replace	
 
-total bid_price_bil //511.6968 
+total bid_price_bil
 
 **# Fig: Sumation of contract value by supply type
 * Figure 2 Distributions of awarded contracts by contract type
@@ -249,6 +249,15 @@ graph export "${output_figures}/MK_202211_lotcount_amt_yearly_stacked.png", as(p
 
 
 **# Histogram of Relative price
+cap drop est_price
+quie gen est_price = lot_estimatedprice
+quie replace est_price = tender_estimatedprice if missing(est_price)
+
+cap drop relprice
+quie gen relprice = bid_price/est_price
+cap drop lrelprice
+quie gen lrelprice = log(relprice)
+
 * Figure 16: The distribution of the logarithm of relative contract value in single-lot tenders
 sum lrelprice  if filter_ok==1 & filter_1lot==1 , det
 di `r(mean)'

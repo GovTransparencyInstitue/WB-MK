@@ -4,11 +4,12 @@
 This project focuses on analyzing the public procurement data  for the MK (North Macedonia) data. The script performs data preprocessing, matching, and analysis to process these entities efficiently. The process also handles  specific calculations such as corruption risks (CRI) and Loss due to corruption risk. It also creates the files used for Network analysis
 
 ## Data Availability Statement:
-The public procurement contracts data is publicly availble from **https://e-nabavki.gov.mk**. GTI collects the procurment data bi-anually. THe version we use was scraped in December 2022. GTI compiled and mastered the publicly availble data. For this project, we used the cleaned and mastered version of the North Macedonian public procurment contracts data. The publicly accessible link for each contract is stored in the *notice_url* and *tender_publications_lastcontract* columns, they refer to the tender notice and contract award notice respectively.
+The public procurement contracts data is publicly available from **https://e-nabavki.gov.mk**. GTI collects the procurement data bi-annually. The version we use was scraped in December 2022. GTI compiled and mastered the publicly available data. For this project, we used the cleaned and mastered version of the North Macedonian public procurment contracts data. The publicly accessible link for each contract is stored in the *notice_url* and *tender_publications_lastcontract* columns, they refer to the tender notice and contract award notice respectively.
 Reach out to info@govtransparency.eu to access the data folder. Once received, you can place the data in the *data/processed* folder and all the scripts should read from that location.
 
 You will receive 2 datasets
-1) MK_202212_processed.dta: This is the main dataset used for analysis. It is a mastered version of the North Macedeonian public procurment contract level data.  
+1) MK_202212_processed.dta: This is the main dataset used for analysis. It is a mastered version of the North Macedonian public procurement contract level data.  
+2) MK_202212_processed.csv.gz: Same data as above in csv.gz format. We use this version for the Network exploration codes.   
 2) TED_yearly_CRI_w_MK_update.dta: This dataset is used to plot the CRI/single bidding country averages.
 
 
@@ -17,11 +18,13 @@ You will receive 2 datasets
 ## Main processes:
 
 ### 1. **Data Exploration**
-   - These scripts explore the data and create CRI distribution figures in the manuscript:
+   - These scripts restructure the date variables, create controls and explores the data to create CRI distribution figures in the manuscript:
      ```stata
-     do "./codes/utility/descriptives.do"
-     do "./codes/utility/figures_paper.do"
-     do "./codes/utility/figures_corruption_risks.do"
+     do "./codes/date_var_restructure.do"
+     do "./codes/gen_controls.do"
+     do "./codes/descriptives.do"
+     do "./codes/figures_paper.do"
+     do "./codes/figures_corruption_risks.do"
      ```
 ### 2. **Cost of Corruption Risk (CoC) Calculation**
    - A script to calculate the cost of corruption risks and exports tables/figures:
@@ -33,7 +36,11 @@ You will receive 2 datasets
   **Python Notebook:** `Create_gephi_edgelist.ipynb`
   **Python Notebook:** `Graph Exploration.ipynb`  
 
- ## Figures Map
+## Exhibits Map
+
+###### Tables in `main.do`
+**[Line 45] Table 1** : Validation of corruption risk indicators using Single bidding as the main corruption risk proxy in an binary logistic regression framework- North Macedonia 2011-2022
+Detailed validation for each indicator can be found in `MK_cri_validation.do`
 
  ###### Figures in `figures_paper.do`
  **Figure 1: Distribution of public contracts over time**
@@ -68,7 +75,7 @@ You will receive 2 datasets
  **[Line 235] Panel B:** Annual total spending in multi-lot and single-lot tenders in North Macedonia, 2011-2022  
 
  **Figure 16:**
- **[Line 253]** The distribution of the logarithm of relative contract value in single-lot tenders  
+ **[Line 261]** The distribution of the logarithm of relative contract value in single-lot tenders  
 
  **Figure 17: Potential savings after eliminating procurement corruption risks (CRI), North Macedonia, 20122-2022**
  **[Line 291] Panel A:** Half Yearly potential savings rate by eliminating CRI and other selected corruption risk indicators  
