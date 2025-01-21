@@ -1,6 +1,22 @@
+local dir : pwd
+
+*Create Directories
+cap mkdir "`dir'/data"
+cap mkdir "`dir'/data/raw"
+cap mkdir "`dir'/data/processed"
+cap mkdir "`dir'/data/utility"
+
+cap mkdir "`dir'/output"
+cap mkdir "`dir'/output/figures"
+cap mkdir "`dir'/output/figures/Stata_format"
+cap mkdir "`dir'/output/tables"
+cap mkdir "`dir'/output/log"
+
+cap mkdir "`dir'/codes"
+cap mkdir "`dir'/codes/Network_Analysis"
+cap mkdir "`dir'/codes/utility"
 
 *Macros
-local dir : pwd
 global data "`dir'/data"
 global data_raw "`dir'/data/raw"
 global data_processed "`dir'/data/processed"
@@ -13,6 +29,9 @@ global output_log "`dir'/output/log"
 global codes "`dir'/codes"
 global codes_utility "`dir'/codes/utility"
 global codes_scrap "`dir'/codes/scrap"
+
+
+
 
 // Load config
 // qui import delimited "${data_utility}/config.csv", clear

@@ -6,9 +6,6 @@ Date: 7th October 2022
 clear all
 cap program drop _all
 
-**# Initialize Project folder
-init_project "Folder_path" "MK_WB"
-
 **# Load Global Macros
 // cd "C:/Ourfolders/Aly/MK_WB"
 do "./codes/utility/config_macros.do"
@@ -49,7 +46,7 @@ replace  yw_ycsh4 = `r(mean)' if missing(w_ycsh4)
 // Table 1: Validation of corruption risk indicators using Single bidding as the main corruption risk proxy in an binary logistic regression framework- North Macedonia 2011-2022
 global dep_vars i.ycorr_proc i.ycorr_subm i.ycorr_decp i.ytaxhav3 yw_ycsh4 i.ycorr_ben
 logit corr_singleb $dep_vars $controls if $sub_sample, $options
-outreg2 using "${output}/tables/logit_table.doc", replace ///
+outreg2 using "${output_tables}/logit_table.doc", replace ///
     ctitle("Logit Regression Results") ///
     dec(3) /// 
     nolabel ///
