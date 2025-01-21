@@ -26,12 +26,11 @@ You will receive 2 datasets
 
 ## Main processes:
 
-### A. **Folder Structure**
-   - These script creates the folder structure required for this project:
-     ```stata
+### **Folder Structure**
+   This script creates the folder structure required for this project:
+    ```stata
     do "./codes/utility/config_macros.do"
      ```
-
 ### 1. **Data Exploration**
    - These scripts restructure the date variables, create controls and explores the data to create CRI distribution figures in the manuscript:
      ```stata
