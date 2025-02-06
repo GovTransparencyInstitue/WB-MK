@@ -15,7 +15,7 @@ To access the data folder, please reach out to **info@govtransparency.eu**. Once
 
 You will receive 2 datasets
 1) MK_202212_processed.dta: This is the main dataset used for analysis. It is a mastered version of the North Macedonian public procurement contract level data.  
-2) MK_202212_processed.csv.gz: Same data as above in csv.gz format. We use this version for the Network exploration codes.   
+2) MK_202212_processed_network_exploration.csv.gz: Same data as above in csv.gz format filtered for variables used in network exploration. We use this version for the Network exploration codes.   
 2) TED_yearly_CRI_w_MK_update.dta: This dataset is used to plot the CRI/single bidding country averages.
 
 ### Important Notes:
@@ -46,10 +46,17 @@ You will receive 2 datasets
      do "${codes}/coc_calculations.do"
      ```
 ### 3. **Network Analysis**
-- This section explores the MK data as a network between buyers and suppliers. The following scripts are available for this purpose:
-  **Python Notebook:** `Create_gephi_edgelist.ipynb`
-  **Python Notebook:** `Graph Exploration.ipynb`  
+- This section explores the MK data as a network between buyers and suppliers. The following scripts are available for this purpose:  
+ **Python Notebook:** `Graph Exploration.ipynb`  
+  This notebook uses the MK dataset to generate graph descriptive statistics, Annex 2 network figures and edge lists.  
+**Python Notebook:** `Create_gephi_edgelist.ipynb`  
+This notebook uses the edge lists listed below created in `Graph Exploration.ipynb` and prepares node lists and edge lists to be loaded in Gephi.  
+- edgelist_global  
+- edgelist_before_long
+- edgelist_after_long
+- edgelist_large_45_*  
 
+Note: Copy *MK_202212_processed_network_exploration.csv.gz* to *./codes/Network_Analysis/data/* - all folder structures are defined in the jupyter notebooks.
 ## Exhibits Map
 
 ###### Tables in `main.do`
@@ -126,13 +133,24 @@ Detailed validation for each indicator can be found in `MK_cri_validation.do`
  **Figure 21:**
  **[Line 584]** Distribution of potential savings (% of total spending) by eliminating all procurement corruption risks (CRI) across regions in North Macedonia, 2011-2022 – Top 10 CPV divisions by highest saving potential  
 
- Network Figures in `Graph Exploration.ipynb`
+ Network Figures come from data prepared in `Graph Exploration.ipynb` and `Create_gephi_edgelist.ipynb`
+
+*Gephi Figures* 
 
  **Figure 23:**  Network Communities in the Public Procurement Network of North Macedonia (2011-2022)  
  **Figure 24:**  Community Split Based on Edge CRI Percentile in North Macedonia's Procurement Network (2011-2022)  
  **Figure 25:**  Procurement network representation before and after the government change in North Macedonia  
  **Figure 26:**  Construction Procurement network representation before and after the government change in North Macedonia, 2011-2022  
  **Figure 27:**  Ego network of the largest procurement authority in the construction sector before and after the government change in North Macedonia, 2011-2022  
+
+*Annex 2 Figures in `Graph Exploration.ipynb`*  
+**Figure A2.a:** Regional Network Metrics Trend Analysis for North Macedonia: 2011-2022  
+**Figure A2.b:** Change in the number of nodes before and after the 2017 government change in North Macedonia  
+**Figure A2.c:** Change in the number of distinct ties before and after the 2017 government change in North Macedonia  
+**Figure A2.d:** Change in the average node degree before and after the 2017 government change in North Macedonia  
+**Figure A2.e:** Change in assortativity before and after the 2017 government change in North Macedonia  
+**Figure A2.f:** Change in the average betweenness centrality before and after the 2017 government change in North Macedonia  
+**Figure A2.g:** Change in the Modularity score (Louvain algorithm) before and after the 2017 government change in North Macedonia
 
 ## Network Analysis: Creation of Node and Edge Lists
 
