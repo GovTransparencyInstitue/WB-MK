@@ -173,95 +173,95 @@ All `edgelists_*` and `nodelists_*` should be exported using **Create_gephi_edge
 **Figure 23:**  Network Communities in the Public Procurement Network of North Macedonia (2011-2022)  
     **Data:** `edgelist_edgelist_global.csv` and `nodelist_edgelist__global.csv`
 
-   1. Load both files into Gephi using the **Import Spreadsheet** option.
-   2. Append both sheets to the same workspace and rename it to `Full`.
-   3. Click on **Statistics** → Run **Average Degree** to calculate degrees.
-   4. Apply **Topology-Giant Component** filter and rename the output as `Complete Network`.
-   5. Set Edge Appearance:
+    1. Load both files into Gephi using the **Import Spreadsheet** option.
+    2. Append both sheets to the same workspace and rename it to `Full`.
+    3. Click on **Statistics** → Run **Average Degree** to calculate degrees.
+    4. Apply **Topology-Giant Component** filter and rename the output as `Complete Network`.
+    5. Set Edge Appearance:
       - **Ranking:** `edge_cri` from **green** to **red**, with **white midpoint**.
-   6. Set Node Appearance:
+    6. Set Node Appearance:
       - **Size:** `1` (to hide nodes).
-   7. Apply **Force Atlas 2 Layout** with parameters:
+    7. Apply **Force Atlas 2 Layout** with parameters:
       - Scaling: `10`
       - Gravity: `1`
       - Edge Weight Influence: `1.5`
-   8. In the **Overview** tab, increase the **edge weight scale** to the maximum.
-   9. In the **Preview** tab, set **Color Option** to **Original**.
-   10. Note: The figure may not be identical to the original but should yield the same conclusions.
+    8. In the **Overview** tab, increase the **edge weight scale** to the maximum.
+    9. In the **Preview** tab, set **Color Option** to **Original**.
+    10. Note: The figure may not be identical to the original but should yield the same conclusions.
 
 **Figure 24:**  Community Split Based on Edge CRI Percentile in North Macedonia's Procurement Network (2011-2022)  
     **Data:** `edgelist_edgelist_global.csv` and `nodelist_edgelist_global.csv` (using the `Full` workspace)
 
-   1. Run **Network Diameter Statistics** to obtain **betweenness centrality**.
-   2. Run **Modularity Statistics** with **resolution set to 1**.
-   3. Adjust Node Appearance:
+    1. Run **Network Diameter Statistics** to obtain **betweenness centrality**.
+    2. Run **Modularity Statistics** with **resolution set to 1**.
+    3. Adjust Node Appearance:
       - **Size:** Based on **betweenness centrality**, ranging from **35 to 100**.
       - **Color:** Based on **Modularity Class**.
-   4. Reapply **Force Atlas 2 Layout** until the network stabilizes.
-   5. Duplicate the **Complete Network** within the workspace and create sub-networks:
+    4. Reapply **Force Atlas 2 Layout** until the network stabilizes.
+    5. Duplicate the **Complete Network** within the workspace and create sub-networks:
       - **Bottom 25th percentile:** Filter edges with weight **≤ 0.304715**.
       - **Top 25th percentile:** Filter edges with weight **≥ 0.586473**.
-   6. Toggle between top and bottom filters to visualize figures in the **Preview** tab.
+    6. Toggle between top and bottom filters to visualize figures in the **Preview** tab.
 
 **Figure 25:**  Procurement network representation before and after the government change in North Macedonia  
     **Data:**
-   - **Left Panel:** `edgelist_edgelist_before_long.csv`, `nodelist_edgelist_before_long.csv` → Rename workspace to `Full - Before Long`
-   - **Right Panel:** `edgelist_edgelist_after_long.csv`, `nodelist_edgelist_after_long.csv` → Rename workspace to `Full - After Long`
+    - **Left Panel:** `edgelist_edgelist_before_long.csv`, `nodelist_edgelist_before_long.csv` → Rename workspace to `Full - Before Long`
+    - **Right Panel:** `edgelist_edgelist_after_long.csv`, `nodelist_edgelist_after_long.csv` → Rename workspace to `Full - After Long`
 
-   For both workspaces:
-   1. Apply **Topology-Giant Component** filter.
-   2. Adjust Edge Appearance:
+    For both workspaces:
+    1. Apply **Topology-Giant Component** filter.
+    2. Adjust Edge Appearance:
       - **Ranking:** `edge_cri` from **green** to **red**, with **white midpoint**.
-   3. Set Node Appearance:
+    3. Set Node Appearance:
       - **Size:** `1` (to hide nodes).
-   4. Apply **Force Atlas 2 Layout** with parameters:
+    4. Apply **Force Atlas 2 Layout** with parameters:
       - Scaling: `10`
       - Gravity: `1`
       - Edge Weight Influence: `1.5`
-   5. In the **Overview** tab, maximize the **edge weight scale**.
-   6. In the **Preview** tab, set **Color Option** to **Original**.
+    5. In the **Overview** tab, maximize the **edge weight scale**.
+    6. In the **Preview** tab, set **Color Option** to **Original**.
 
 **Figure 26:**  Construction Procurement network representation before and after the government change in North Macedonia, 2011-2022  
     **Data:**
-   Gephi - **Left Panel:** `edgelist_edgelist_45_before.csv`, `nodelist_edgelist_45_before.csv` → Rename workspace to `45 Before`
-   - **Right Panel:** `edgelist_edgelist_45_after.csv`, `nodelist_edgelist_45_after.csv` → Rename workspace to `45 After`
+    Gephi - **Left Panel:** `edgelist_edgelist_45_before.csv`, `nodelist_edgelist_45_before.csv` → Rename workspace to `45 Before`
+    - **Right Panel:** `edgelist_edgelist_45_after.csv`, `nodelist_edgelist_45_after.csv` → Rename workspace to `45 After`
 
-   For both workspaces:
-   1. Apply **Topology-Giant Component** filter.
-   2. Adjust Edge Appearance:
+    For both workspaces:
+    1. Apply **Topology-Giant Component** filter.
+    2. Adjust Edge Appearance:
       - **Ranking:** `edge_cri` from **green** to **red**, with **white midpoint**.
-   3. Set Node Appearance:
+    3. Set Node Appearance:
       - **Size:** `10`
       - **Color:** Black
-   4. Apply **Force Atlas 2 Layout** with parameters:
+    4. Apply **Force Atlas 2 Layout** with parameters:
       - Scaling: `10`
       - Gravity: `1`
       - Edge Weight Influence: `1.5`
-   5. In the **Overview** tab, set the **edge weight scale** to **50%**.
-   6. In the **Preview** tab, set **Color Option** to **Original**.
+    5. In the **Overview** tab, set the **edge weight scale** to **50%**.
+    6. In the **Preview** tab, set **Color Option** to **Original**.
 
    **Note:** Figures may not be identical but should support the same conclusions.
 
 **Figure 27:**  Ego network of the largest procurement authority in the construction sector before and after the government change in North Macedonia, 2011-2022  
     **Data:**
-   - `edgelist_edgelist_large_45_2_buyer_before.csv`, `nodelist_edgelist_large_45_2_buyer_before.csv` → Rename workspace to `Largest 45 Before`
-   - `edgelist_edgelist_large_45_2_buyer_after.csv`, `nodelist_edgelist_large_45_2_buyer_after.csv` → Rename workspace to `Largest 45 After`
+    - `edgelist_edgelist_large_45_2_buyer_before.csv`, `nodelist_edgelist_large_45_2_buyer_before.csv` → Rename workspace to `Largest 45 Before`
+    - `edgelist_edgelist_large_45_2_buyer_after.csv`, `nodelist_edgelist_large_45_2_buyer_after.csv` → Rename workspace to `Largest 45 After`
 
-   For both workspaces:
-   1. Adjust Edge Appearance:
+    For both workspaces:
+    1. Adjust Edge Appearance:
       - **Ranking:** `edge_cri` from **green** to **red**, with **white midpoint**.
-   2. Set Node Appearance:
+    2. Set Node Appearance:
       - **Size:** Based on `cri`, ranging from **10 to 20**.
       - **Color:** Black.
-   3. Apply **Force Atlas 2 Layout** with parameters:
+    3. Apply **Force Atlas 2 Layout** with parameters:
       - Scaling: `10`
       - Gravity: `1`
       - Edge Weight Influence: `1.5`
       - If needed, use **Expansion Layout** to better visualize ties.
-   4. In the **Overview** tab, set the **edge weight scale** to **25%**.
-   5. In the **Preview** tab, set **Color Option** to **Original**.
+    4. In the **Overview** tab, set the **edge weight scale** to **25%**.
+    5. In the **Preview** tab, set **Color Option** to **Original**.
 
-   **Note:** Figures may not be identical but should lead to the same conclusions.
+    **Note:** Figures may not be identical but should lead to the same conclusions.
 
 
 *Annex 2 Figures in `Graph Exploration.ipynb`*  
