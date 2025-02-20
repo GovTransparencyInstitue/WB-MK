@@ -207,25 +207,25 @@ All `edgelists_*` and `nodelists_*` should be exported using **Create_gephi_edge
     6. In the **Preview** tab, set **Color Option** to **Original**.
 
  **Figure 26:**  Construction Procurement network representation before and after the government change in North Macedonia, 2011-2022  
- **Data:**
-Gephi - **Left Panel:** `edgelist_edgelist_45_before.csv`, `nodelist_edgelist_45_before.csv` → Rename workspace to `45 Before`
-- **Right Panel:** `edgelist_edgelist_45_after.csv`, `nodelist_edgelist_45_after.csv` → Rename workspace to `45 After`
+     **Data:**
+    Gephi - **Left Panel:** `edgelist_edgelist_45_before.csv`, `nodelist_edgelist_45_before.csv` → Rename workspace to `45 Before`
+    - **Right Panel:** `edgelist_edgelist_45_after.csv`, `nodelist_edgelist_45_after.csv` → Rename workspace to `45 After`
 
-For both workspaces:
-1. Apply **Topology-Giant Component** filter.
-2. Adjust Edge Appearance:
-   - **Ranking:** `edge_cri` from **green** to **red**, with **white midpoint**.
-3. Set Node Appearance:
-   - **Size:** `10`
-   - **Color:** Black
-4. Apply **Force Atlas 2 Layout** with parameters:
-   - Scaling: `10`
-   - Gravity: `1`
-   - Edge Weight Influence: `1.5`
-5. In the **Overview** tab, set the **edge weight scale** to **50%**.
-6. In the **Preview** tab, set **Color Option** to **Original**.
+    For both workspaces:
+    1. Apply **Topology-Giant Component** filter.
+    2. Adjust Edge Appearance:
+       - **Ranking:** `edge_cri` from **green** to **red**, with **white midpoint**.
+    3. Set Node Appearance:
+       - **Size:** `10`
+       - **Color:** Black
+    4. Apply **Force Atlas 2 Layout** with parameters:
+       - Scaling: `10`
+       - Gravity: `1`
+       - Edge Weight Influence: `1.5`
+    5. In the **Overview** tab, set the **edge weight scale** to **50%**.
+    6. In the **Preview** tab, set **Color Option** to **Original**.
 
-**Note:** Figures may not be identical but should support the same conclusions.
+    **Note:** Figures may not be identical but should support the same conclusions.
 
  **Figure 27:**  Ego network of the largest procurement authority in the construction sector before and after the government change in North Macedonia, 2011-2022  
      **Data:**
