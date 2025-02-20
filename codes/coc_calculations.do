@@ -79,11 +79,11 @@ quie gen lcri = log(cri)
 **# Controls + Filters used
 
 global controls i.cvalue10 i.anb_type i.ca_type i.anb_location i.year i.market_id
-// global options vce(cluster market_id)
+global options vce(cluster market_id)
 global sub_sample filter_ok==1 & filter_1lot==1 & group_1==1
 *************************************************
 **# CRI regression
-
+* Table 3: Regression results quantifying the correlation between CRI and the logarithm of relative price  North Macedonia 2011-2022
 global sub_sample filter_ok==1 & filter_1lot==1 & group_1==1
 
 global controls_m1
@@ -91,8 +91,12 @@ global controls_m2 i.cvalue10 i.ca_type i.market_id
 global controls_m3 i.cvalue10 i.ca_type i.market_id i.anb_type i.anb_location
 global controls_m4 i.cvalue10 i.ca_type i.market_id i.anb_type i.anb_location i.year i.month
 
+local output_file "${output_tables}/lrelprice_cri_models.doc"
 forval x=1/4{
 quie reg lrelprice cri ${controls_m`x'} if $sub_sample, $options
+outreg2 using "`output_file'", append ///
+        ctitle("Model `x'") ///
+        dec(3) nolabel keep(cri) addnote("")
 est store m
 estout m, keep(cri) cells(b(star fmt(3)) se) stats(N r2)
 }
@@ -113,9 +117,12 @@ graph twoway (scatter lrelprice cri) (qfitci lrelprice cri, ciplot(rline)) if fi
 // graph export "${output_figures}/MK_202211_lrelprice_cri_group2.png", as(png) replace			
 *************************************************
 **# Robustness regression - individual components
+* Table 4: Regression results quantifying the correlation between corruption indicators and the logarithm of relative price  in North Macedonia 2011-2022
 di "Start here"
-local components corr_singleb corr_proc corr_subm corr_decp corr_ben taxhav3
+local components corr_singleb corr_subm corr_decp corr_ben taxhav3
+global options vce(cluster market_id)
 local groups group_1 
+local output_file "${output_tables}/lrelprice_corr_ind_models.doc"
 // group_2
 foreach comp in `components'{
 	cap drop `comp'_x
@@ -126,8 +133,11 @@ foreach comp in `components'{
 		di "Result for `comp' & `group' "
 		global sub_sample filter_ok==1 & filter_1lot==1 & `group'==1
 		quie reg lrelprice i.`comp'_x $controls if $sub_sample, $options
+		outreg2 using "`output_file'", append ///
+        ctitle("Model") ///
+        dec(3) nolabel keep(i.`comp'_x) addnote("")
 		est store m
-estout m, keep(*.`comp'_x) cells(b(star fmt(3)) se) stats(N r2)
+		estout m, keep(*.`comp'_x) cells(b(star fmt(3)) se) stats(N r2)
 		
 	}
 	cap drop `comp'_x
@@ -142,18 +152,34 @@ gen xcorr_proc = corr_proc
 replace xcorr_proc =1 if xcorr_proc==0.5 & $sub_sample
 tab xcorr_proc if $sub_sample, m
 
-quie reg lrelprice i.xcorr_proc $controls if $sub_sample, $options
-est store m
-estout m, keep(*.xcorr_proc) cells(b(star fmt(3)) se) stats(N r2)
+local components xcorr_proc
+local output_file "${output_tables}/lrelprice_corr_ind_models.doc" 
+foreach comp in `components'{
+	quie reg lrelprice i.`comp'  $controls if $sub_sample, $options
+	outreg2 using "`output_file'", append ctitle("Model") dec(3) nolabel keep(i.`comp') addnote("")
+	est store m
+	estout m, keep(*.`comp') cells(b(star fmt(3)) se) stats(N r2)
+
+}
+// est store m
+// estout m, keep(*.xcorr_proc) cells(b(star fmt(3)) se) stats(N r2)
 // cap drop xcorr_proc
 
 
 // Buyer concentration
 
 global sub_sample filter_ok==1 & filter_1lot==1 & group_1==1
+global options vce(cluster market_id)
+local output_file "${output_tables}/lrelprice_corr_ind_models.doc"
 quie reg lrelprice c.w_ycsh4 $controls if $sub_sample, $options
+outreg2 using "`output_file'", append ///
+ctitle("Model") ///
+dec(3) nolabel keep(w_ycsh4) addnote("")
 est store m
 estout m, keep(w_ycsh4) cells(b(star fmt(3)) se) stats(N r2)
+
+// est store m
+// estout m, keep(w_ycsh4) cells(b(star fmt(3)) se) stats(N r2)
 *************************************************
 **# CRI + Individual indicators COC Estimations
 frame change default
