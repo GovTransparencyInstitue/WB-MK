@@ -119,48 +119,53 @@ graph twoway (scatter lrelprice cri) (qfitci lrelprice cri, ciplot(rline)) if fi
 **# Robustness regression - individual components
 * Table 4: Regression results quantifying the correlation between corruption indicators and the logarithm of relative price  in North Macedonia 2011-2022
 di "Start here"
-local components corr_singleb corr_subm corr_decp corr_ben taxhav3
-global options vce(cluster market_id)
-local groups group_1 
-local output_file "${output_tables}/lrelprice_corr_ind_models.doc"
-// group_2
-foreach comp in `components'{
-	cap drop `comp'_x
-	gen `comp'_x=`comp'*2
-	replace `comp'_x = 9 if missing(`comp'_x)
-	
-	foreach group in `groups'{
-		di "Result for `comp' & `group' "
-		global sub_sample filter_ok==1 & filter_1lot==1 & `group'==1
-		quie reg lrelprice i.`comp'_x $controls if $sub_sample, $options
-		outreg2 using "`output_file'", append ///
-        ctitle("Model") ///
-        dec(3) nolabel keep(i.`comp'_x) addnote("")
-		est store m
-		estout m, keep(*.`comp'_x) cells(b(star fmt(3)) se) stats(N r2)
-		
-	}
-	cap drop `comp'_x
-}
 
 // Changed corr_proc  -- only one case of corrproc==1
 global sub_sample filter_ok==1 & filter_1lot==1 & group_1==1
 tab corr_proc if filter_ok & filter_1lot, m
 tab corr_proc if $sub_sample, m
-cap drop xcorr_proc
-gen xcorr_proc = corr_proc
-replace xcorr_proc =1 if xcorr_proc==0.5 & $sub_sample
-tab xcorr_proc if $sub_sample, m
+cap drop corr_proc_x
+gen corr_proc_x = corr_proc
+replace corr_proc_x =1 if corr_proc_x==0.5 & $sub_sample
+tab corr_proc_x if $sub_sample, m
 
-local components xcorr_proc
-local output_file "${output_tables}/lrelprice_corr_ind_models.doc" 
+global options vce(cluster market_id)
+local groups group_1 
+local output_file "${output_tables}/lrelprice_corr_ind_models.doc"
+
+local components corr_singleb corr_subm corr_decp corr_ben taxhav3
 foreach comp in `components'{
-	quie reg lrelprice i.`comp'  $controls if $sub_sample, $options
-	outreg2 using "`output_file'", append ctitle("Model") dec(3) nolabel keep(i.`comp') addnote("")
-	est store m
-	estout m, keep(*.`comp') cells(b(star fmt(3)) se) stats(N r2)
-
+	cap drop `comp'_x
+	gen `comp'_x=`comp'*2
+	replace `comp'_x = 9 if missing(`comp'_x)
 }
+
+local components corr_singleb_x corr_proc_x corr_subm_x corr_decp_x taxhav3_x corr_ben_x 
+foreach comp in `components'{
+	foreach group in `groups'{
+		di "Result for `comp' & `group' "
+		global sub_sample filter_ok==1 & filter_1lot==1 & `group'==1
+		quie reg lrelprice i.`comp' $controls if $sub_sample, $options
+		outreg2 using "`output_file'", append ///
+        ctitle("Model") ///
+        dec(3) nolabel keep(i.`comp') addnote("")
+		est store m
+		estout m, keep(*.`comp') cells(b(star fmt(3)) se) stats(N r2)
+
+	}
+	cap drop `comp'_x
+}
+
+
+// local components xcorr_proc
+// local output_file "${output_tables}/lrelprice_corr_ind_models.doc" 
+// foreach comp in `components'{
+// 	quie reg lrelprice i.`comp'  $controls if $sub_sample, $options
+// 	outreg2 using "`output_file'", append ctitle("Model") dec(3) nolabel keep(i.`comp') addnote("")
+// 	est store m
+// 	estout m, keep(*.`comp') cells(b(star fmt(3)) se) stats(N r2)
+//
+// }
 // est store m
 // estout m, keep(*.xcorr_proc) cells(b(star fmt(3)) se) stats(N r2)
 // cap drop xcorr_proc
